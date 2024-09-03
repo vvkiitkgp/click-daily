@@ -10,7 +10,7 @@ import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/R
 import { Dimensions } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
+// const screenHeight = Dimensions.get('window').height;
 interface Props {
   pose: Pose;
   pictureData: Picture;
