@@ -9,7 +9,7 @@ export interface Picture {
   poseId: string;
   pictureId: string;
   picture: string;
-  date: string;
+  date: Date;
   day: number;
   streak: number;
 }
@@ -36,10 +36,10 @@ export interface Pose {
   userId: string;
   paths: Path[];
   name: string;
-  reminder: string;
+  reminder: Date;
   totalDayCount: number;
   photoCount: number;
-  createdDate: string;
+  createdDate: Date;
   isPoseClickedToday: boolean;
   isMissedToday: boolean;
   streak: number;
@@ -47,4 +47,10 @@ export interface Pose {
   totalMissed: number;
   poseIndexForUser: number;
   checklist: ChecklistItem[];
+}
+
+export interface AsyncResult<TData = any> {
+  data?: TData;
+  loading: boolean;
+  error?: Error;
 }

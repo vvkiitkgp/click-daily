@@ -1,5 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Path, Pose } from '../../../types';
+import { createNewPoseApi, modifyPoseByIdApi } from '../../../services/api';
+import { generateNewUuid } from '../../../utils/generateNewUuid';
+import { getCurrentTime } from './utils';
+import { DEFAULT_USER_ID } from '../../../utils/common';
 
 export enum CreateNewPoseSteps {
   POSE_CAPTURE = 'POSE_CAPTURE',
@@ -16,35 +20,26 @@ export const useCreateNewPoseHook = () => {
   );
   const [firstImage, setFirstImage] = useState<string | null>(null);
   const [penThickness, setPenThickness] = useState<number>(4);
-  const [createdPose, setCreatedPose] = useState<Pose>({
-    createdDate: new Date().toString(),
+  const defaultPoseData: Pose = {
+    createdDate: new Date(),
     enabledWeekDays: [],
     isMissedToday: false,
     isPoseClickedToday: true,
     name: '',
     paths: [],
     photoCount: 1,
-    poseId: '1', // TODO
+    poseId: '',
     poseIndexForUser: 1, // TODO according to set reminder
-    reminder: '',
+    reminder: getCurrentTime(),
     streak: 1,
     totalDayCount: 1,
     totalMissed: 0,
-    userId: '1', // TODO set user Id here
+    userId: DEFAULT_USER_ID, // TODO set user Id here
     checklist: [
       {
         id: '1',
         index: 0,
         message: 'Did workout today?',
-        type: 'checklist',
-        count: 0,
-        isChecked: false,
-      },
-      {
-        id: '2',
-        index: 0,
-        message:
-          'Had enough protein today? bij hb jbj bjb b jb bj b bhj bh bb hhb hb buh buh bu bub yb ub ubv bub ub ubu buy b bub ub uy buyb uybhu b bh',
         type: 'checklist',
         count: 0,
         isChecked: false,
@@ -57,16 +52,22 @@ export const useCreateNewPoseHook = () => {
         count: 0,
         isChecked: false,
       },
-      {
-        id: '4',
-        index: 2,
-        message: 'squates 15',
-        type: 'count',
-        count: 0,
-        isChecked: false,
-      },
     ],
-  });
+  };
+  const [createdPose, setCreatedPose] = useState<Pose | null>(null);
+
+  useEffect(() => {
+    const createPose = async () => {
+      const newPose: Pose = {
+        ...defaultPoseData,
+        poseId: `${generateNewUuid()}`,
+      };
+      setCreatedPose(newPose);
+      await createNewPoseApi(newPose);
+    };
+
+    createPose();
+  }, []);
 
   const stepsOrder: CreateNewPoseSteps[] = [
     CreateNewPoseSteps.POSE_CAPTURE,
@@ -77,6 +78,11 @@ export const useCreateNewPoseHook = () => {
     CreateNewPoseSteps.POSE_CREATED,
   ];
 
+  const handleMofifyPose = async (data: Pose) => {
+    await modifyPoseByIdApi(data);
+    setCreatedPose(data);
+  };
+
   return {
     step,
     setStep,
@@ -86,6 +92,6 @@ export const useCreateNewPoseHook = () => {
     penThickness,
     setPenThickness,
     createdPose,
-    setCreatedPose,
+    setCreatedPose: handleMofifyPose,
   };
 };

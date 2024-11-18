@@ -3,7 +3,6 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationScreens } from '../../../navigation/AppNavigator';
 import { PoseFilter } from './PoseFilter';
-import { posesMock } from '../../../mocks/databaseMocks';
 import { Pose } from '../../../types';
 import defaultColors from '../../../styles/colors';
 import { Fontisto } from '@expo/vector-icons';
@@ -21,10 +20,11 @@ export const PoseParentCard = ({ pose }: { pose: Pose }) => {
       return <Fontisto name="camera" size={20} color={defaultColors.primary} />;
     }
   };
+
   return (
     <TouchableOpacity
       onPress={() =>
-        navigation.navigate(NavigationScreens.POSE_HOME_SCREEN,{pose})
+        navigation.navigate(NavigationScreens.POSE_HOME_SCREEN, { pose })
       }
       style={styles.mainContainer}
     >
@@ -41,7 +41,7 @@ export const PoseParentCard = ({ pose }: { pose: Pose }) => {
             marginTop: 10,
           }}
         >
-          {pose.name.length ? pose.name : 'Pose Name'}
+          {pose.name?.length ? pose.name : 'Pose Name'}
         </Text>
         <View
           style={{

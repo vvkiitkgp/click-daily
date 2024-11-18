@@ -5,6 +5,7 @@ export const formatPhotosToWeekArray = (
 ): PictureInAWeek[] => {
   let week = 1;
   let formatedPhotosToWeek: PictureInAWeek[] = [];
+  console.log(pictureList,"pictureList pictureList pictureList pictureList")
   pictureList.map((picture) => {
     if (formatedPhotosToWeek.length < week) {
       formatedPhotosToWeek.push({
@@ -22,6 +23,6 @@ export const formatPhotosToWeekArray = (
       week++;
     }
   });
-
+console.log(formatedPhotosToWeek,"formatedPhotosToWeek formatedPhotosToWeek formatedPhotosToWeek")
   return formatedPhotosToWeek;
 };

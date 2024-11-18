@@ -1,23 +1,29 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import defaultColors from '../../../../styles/colors';
-import { Fontisto } from '@expo/vector-icons';
 import { Pose } from '../../../../types';
 import { PoseParentCard } from '../../../Common/PoseParentCard';
-import Video from 'react-native-video';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationScreens } from '../../../../navigation/AppNavigator';
+import { PosesContext } from '../../../../contexts/PosesContext';
 
 interface PoseCreatedProps {
   createdPose: Pose;
 }
 export const PoseCreated = ({ createdPose }: PoseCreatedProps) => {
   const navigation = useNavigation();
-
+  const { posesList, setPosesList } = useContext(PosesContext);
   // TODO api call
   setTimeout(() => {
     navigation.navigate(NavigationScreens.HOME_SCREEN as never);
   }, 3000);
+
+  useEffect(() => {
+    if (createdPose) {
+      setPosesList([...posesList, createdPose]);
+    }
+  }, []);
+
   return (
     <View style={styles.container}>
       <View pointerEvents="none">

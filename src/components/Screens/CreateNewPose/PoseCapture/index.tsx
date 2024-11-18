@@ -1,82 +1,135 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  Alert,
-} from 'react-native';
-import { Camera } from 'expo-camera';
-import { Svg, Path } from 'react-native-svg';
+  CameraView,
+  Camera,
+  CameraType,
+  FlashMode,
+  useCameraPermissions,
+} from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 
 import defaultColors from '../../../../styles/colors';
-import { posesMock } from '../../../../mocks/databaseMocks';
-import { PoseFilter } from '../../../Common/PoseParentCard/PoseFilter';
-import { Fontisto } from '@expo/vector-icons';
 import { GuideAlert } from '../../../Common/ui/GuideAlert';
+import { Button } from 'react-native-elements';
+import { PoseFilter } from '../../ClickTodayScreen/PoseFilter';
+import { Pose } from '../../../../types';
 
 interface Props {
   setPoseCaptureImage: (image: string) => void;
   onNextCallback: () => void;
   image: string | null;
+  pose?: Pose;
+  enableFilter: boolean;
 }
 
 export const PoseCapture = ({
   setPoseCaptureImage,
   onNextCallback,
   image,
+  pose,
+  enableFilter,
 }: Props) => {
-  const [hasCameraPermission, setHasCameraPermission] =
-    useState<boolean>(false);
-  const [hasMediaLibraryPermission, setHasMediaLibraryPermission] =
-    useState<boolean>(false);
-  const [type, setType] = useState(Camera.Constants.Type.back);
-  const [flash, setFlash] = useState(Camera.Constants.FlashMode.off);
-  const cameraRef = useRef<Camera>(null);
+  // const [hasCameraPermission, setHasCameraPermission] =
+  //   useState<boolean>(false);
+  // const [hasMediaLibraryPermission, setHasMediaLibraryPermission] =
+  //   useState<boolean>(false);
 
-  useEffect(() => {
-    (async () => {
-      const { status: cameraStatus } =
-        await Camera.requestCameraPermissionsAsync();
-      const { status: mediaLibraryStatus } =
-        await MediaLibrary.requestPermissionsAsync();
-      setHasCameraPermission(cameraStatus === 'granted');
-      setHasMediaLibraryPermission(mediaLibraryStatus === 'granted');
-    })();
-  }, []);
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [flash, setFlash] = useState<FlashMode>('off');
+  const cameraRef = useRef<CameraView>(null);
+
+  const [permission, requestPermission] = useCameraPermissions();
+
+  if (!permission) {
+    // Camera permissions are still loading.
+    return <Text>No access to camera</Text>;
+  }
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet.
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>
+          We need your permission to show the camera
+        </Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </View>
+    );
+  }
+
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status: cameraStatus } =
+  //       await Camera.requestCameraPermissionsAsync();
+  //     const { status: mediaLibraryStatus } =
+  //       await MediaLibrary.requestPermissionsAsync();
+  //     setHasCameraPermission(cameraStatus === 'granted');
+  //     setHasMediaLibraryPermission(mediaLibraryStatus === 'granted');
+  //   })();
+  // }, []);
 
   const takePicture = async () => {
     if (cameraRef.current) {
+      console.log('takingg pic');
       try {
         const options = { quality: 0.5, base64: true, skipProcessing: true };
         const data = await cameraRef.current.takePictureAsync(options);
-        setPoseCaptureImage(data.uri); // Store the URI instead of the whole object
+
+        console.log(data, 'Captured Image Data');
+        if (data) {
+          setPoseCaptureImage(data.uri);
+        }
       } catch (e) {
-        console.log(e);
+        console.log('Error taking picture:', e);
       }
     }
   };
 
-  if (!hasCameraPermission) {
-    return <Text>No access to camera</Text>;
+  function toggleCameraFacing() {
+    console.log('flipping cam', facing);
+    setFacing((current) => (current === 'back' ? 'front' : 'back'));
   }
 
   return (
     <View style={styles.container}>
       {!image ? (
-        <TouchableOpacity onPress={takePicture} style={styles.camera}>
-          <GuideAlert message="Tap to Capture" />
-          <Camera
+        <View style={styles.cameraWrapper}>
+          <CameraView
             style={styles.camera}
-            type={type}
-            flashMode={flash}
+            facing={facing}
+            flash={flash}
             ref={cameraRef}
           />
-        </TouchableOpacity>
+          {/* <CameraView style={styles.camera} facing={facing}>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={toggleCameraFacing}
+              >
+                <Text style={styles.text}>Flip Camera</Text>
+              </TouchableOpacity>
+            </View>
+          </CameraView> */}
+          {enableFilter && pose && (
+            <View style={styles.poseFilterContainer}>
+              <PoseFilter paths={pose.paths} />
+            </View>
+          )}
+
+          <TouchableOpacity onPress={takePicture} style={styles.captureButton}>
+            <GuideAlert message="Tap to Capture" />
+          </TouchableOpacity>
+        </View>
       ) : (
-        <Image source={{ uri: image }} style={styles.camera} />
+        <>
+          {enableFilter && pose && (
+            <View style={styles.poseFilterContainer}>
+              <PoseFilter paths={pose.paths} />
+            </View>
+          )}
+          <Image source={{ uri: image }} style={styles.camera} />
+        </>
       )}
     </View>
   );
@@ -85,39 +138,50 @@ export const PoseCapture = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+  },
+  cameraWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   camera: {
     flex: 1,
-    display: 'flex',
-    height: '100%',
     width: '100%',
-    justifyContent: 'center',
+  },
+  captureButton: {
+    position: 'absolute',
+    bottom: 100,
+    backgroundColor: defaultColors.buttonDefault,
+    padding: 15,
+    borderRadius: 50,
+    zIndex: 20,
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    margin: 64,
+  },
+  button: {
+    flex: 1,
+    alignSelf: 'flex-end',
     alignItems: 'center',
   },
-  actionBar: {
-    position: 'absolute',
-    flexDirection: 'row',
-    top: 50,
-    width: '90%',
-    marginLeft: '5%',
-    marginRight: '5%',
-    backgroundColor: 'grey',
-    display: 'flex',
-    alignItems: 'center',
-    borderRadius: 30,
-    paddingTop: 10,
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  message: {
+    textAlign: 'center',
     paddingBottom: 10,
   },
-  cameraIconButton: {
-    backgroundColor: defaultColors.buttonDefault,
-    height: 70,
-    width: 70,
-    borderRadius: 25,
-    borderWidth: 3,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+  poseFilterContainer: {
+    position: 'absolute',
+    zIndex: 10,
+    width: '100%',
+    height: '100%',
   },
 });
 

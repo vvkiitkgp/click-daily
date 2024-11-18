@@ -10,7 +10,7 @@ interface PoseFilterProps {
 export const PoseFilter = ({ paths }: PoseFilterProps) => {
   return (
     <Svg height={125} width={70.3} viewBox="-50 100 500 500">
-      {paths.map((p, index) => {
+      {paths?.map((p, index) => {
         return (
           <SvgPath
             key={`path-${index}`}

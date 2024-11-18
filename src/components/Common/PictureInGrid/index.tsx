@@ -34,6 +34,11 @@ export const PictureInGrid = ({ size, pictureData, onPress }: Props) => {
     );
   };
 
+  console.log(
+    'pictureDatapictureDatapictureData',
+    pictureData,
+    'pictureData pictureData pictureData'
+  );
   return (
     <TouchableOpacity
       style={{
@@ -45,7 +50,7 @@ export const PictureInGrid = ({ size, pictureData, onPress }: Props) => {
       onPress={() => onPress(pictureData)}
     >
       <Image
-        source={require('../../../../assets/images/mirrorSelfieMock.jpeg')}
+        source={{ uri: pictureData.picture }}
         style={{ width: size, height: size }}
         resizeMode="contain"
       />

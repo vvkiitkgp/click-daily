@@ -1,28 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Image,
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  Dimensions,
-} from 'react-native';
+import React, { useState } from 'react';
+import { Image, View, StyleSheet, Dimensions } from 'react-native';
 import defaultColors from '../../../../styles/colors';
 import { Svg, Path as SVGPath } from 'react-native-svg';
 import { Slider } from '@rneui/themed';
 import { GuideAlert } from '../../../Common/ui/GuideAlert';
-import { useCreateNewPoseHook } from '../useCreateNewPoseHook';
 import { Path, Pose } from '../../../../types';
 import { Fontisto } from '@expo/vector-icons';
+
 const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
+
 interface Props {
   image: string;
+  createdPose: Pose;
+  setCreatedPose: (p: Pose) => void;
+  penThickness: number;
+  setPenThickness: (p: number) => void;
 }
-export const PoseDraw = ({ image }: Props) => {
-  const { createdPose, setCreatedPose, penThickness, setPenThickness } =
-    useCreateNewPoseHook();
+export const PoseDraw = ({
+  image,
+  createdPose,
+  setCreatedPose,
+  penThickness,
+  setPenThickness,
+}: Props) => {
   const { paths } = createdPose;
-  const [currentPath, setCurrentPath] = useState<Path>({ d: [], penThickness });
+  const [currentPath, setCurrentPath] = useState<Path | undefined>({
+    d: [],
+    penThickness,
+  });
 
   const onTouchEnd = () => {
     const tempPosePaths = paths;

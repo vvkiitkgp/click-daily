@@ -3,10 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Input } from 'react-native-elements';
 import defaultColors from '../../../../styles/colors';
 import { Fontisto } from '@expo/vector-icons';
-import { PoseFilter } from '../../../Common/PoseParentCard/PoseFilter';
-import { Path, Pose } from '../../../../types';
+import { Pose } from '../../../../types';
 import { PoseParentCard } from '../../../Common/PoseParentCard';
-import { useCreateNewPoseHook } from '../useCreateNewPoseHook';
 
 interface CreatePoseName {
   createdPose: Pose;

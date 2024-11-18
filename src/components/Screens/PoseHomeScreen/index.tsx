@@ -30,6 +30,7 @@ export enum Features {
 
 import { RouteProp } from '@react-navigation/native';
 import ViewPhotoScreen from './ViewPhotoScreen';
+import { useGetAllPicturesForPose } from './hooks/useGetAllPicturesForPose';
 
 type RootStackParamList = {
   // Define your screen names here
@@ -52,6 +53,13 @@ export const PoseHomeScreen = ({ route }: Props) => {
   const [selectedPictureData, setSelectedPictureData] =
     useState<Picture | null>(null);
   const insets = useSafeAreaInsets();
+  console.log(pose.poseId, 'poseId poseId poseId pose RRRRRRR');
+  const { data, loading, error } = useGetAllPicturesForPose(pose.poseId);
+
+  if (loading) return <Text>Loading...</Text>;
+  if (error) return <Text>Error: {error.message}</Text>;
+
+  console.log('FROM HEEREE', data, 'THE PHOTOSSS DATA');
 
   // const screenHeight = Dimensions.get('window').height - insets.top;
   const screenHeight = Dimensions.get('window').height;
@@ -198,7 +206,7 @@ export const PoseHomeScreen = ({ route }: Props) => {
             () => {
               setActiveScreen(Features.VIEW_PHOTO);
               setWithPoseActive(!withPoseActive);
-              setSelectedPictureData(picturesMock[picturesMock.length - 1]);
+              setSelectedPictureData(data[data.length - 1]);
             },
             '33.3%',
             Features.VIEW_PHOTO
@@ -275,43 +283,49 @@ export const PoseHomeScreen = ({ route }: Props) => {
           />
         </View>
         {activeScreen === null ? (
-          <View
-            style={{
-              ...styles.photoGridContainer,
-              height: photoGridContainerHeight,
-            }}
-          >
-            <ScrollView horizontal>
-              <View>
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    width: (photoGridContainerHeight / 3) * 7,
-                  }}
-                >
-                  {getPicturesForWeek(formatPhotosToWeekArray(picturesMock)[0])}
-                </View>
+          data.length ? (
+            <View
+              style={{
+                ...styles.photoGridContainer,
+                height: photoGridContainerHeight,
+              }}
+            >
+              <ScrollView horizontal>
+                <View>
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      width: (photoGridContainerHeight / 3) * 7,
+                    }}
+                  >
+                    {getPicturesForWeek(formatPhotosToWeekArray(data)[0])}
+                  </View>
 
-                <View
-                  style={{
-                    height: (photoGridContainerHeight / 3) * 2, // Adjusted height to match two rows
-                    overflow: 'hidden',
-                  }}
-                >
-                  <ScrollView>
-                    {formatPhotosToWeekArray(picturesMock).map(
-                      (weekPhotos, index) => {
-                        if (weekPhotos.week !== 1) {
-                          return getPicturesForWeek(weekPhotos);
+                  <View
+                    style={{
+                      height: (photoGridContainerHeight / 3) * 2, // Adjusted height to match two rows
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <ScrollView>
+                      {formatPhotosToWeekArray(data).map(
+                        (weekPhotos, index) => {
+                          if (weekPhotos.week !== 1) {
+                            return getPicturesForWeek(weekPhotos);
+                          }
                         }
-                      }
-                    )}
-                  </ScrollView>
+                      )}
+                    </ScrollView>
+                  </View>
                 </View>
-              </View>
-            </ScrollView>
-          </View>
+              </ScrollView>
+            </View>
+          ) : (
+            <View>
+              <Text>No data</Text>
+            </View>
+          )
         ) : (
           renderActiveScreen()
         )}

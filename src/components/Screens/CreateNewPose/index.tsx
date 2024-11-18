@@ -17,6 +17,8 @@ import { CreatePoseName } from './CreatePoseName';
 import { PoseReminder } from './PoseReminder';
 import { PoseCreated } from './PoseCreated';
 import { PoseChecklist } from './PoseChecklist';
+import { uploadPictureByPoseIdApi } from '../../../services/api';
+import { generateNewUuid } from '../../../utils/generateNewUuid';
 
 export const CreateNewPose = () => {
   const {
@@ -27,6 +29,8 @@ export const CreateNewPose = () => {
     firstImage,
     createdPose,
     setCreatedPose,
+    penThickness,
+    setPenThickness,
   } = useCreateNewPoseHook();
   const navigation = useNavigation();
 
@@ -108,11 +112,27 @@ export const CreateNewPose = () => {
                 name="check"
                 size={20}
                 color="white"
-                onPress={() =>
+                onPress={async () => {
+                  console.log('YOO YOO HERE');
                   saveImageToDevice(firstImage, setFirstImage, () =>
                     setStep(CreateNewPoseSteps.POSE_DRAW)
-                  )
-                }
+                  );
+                  if (
+                    createdPose?.createdDate &&
+                    createdPose?.poseId &&
+                    createdPose?.userId
+                  ) {
+                    await uploadPictureByPoseIdApi({
+                      date: createdPose.createdDate,
+                      day: 1,
+                      picture: firstImage,
+                      pictureId: generateNewUuid().toString(),
+                      poseId: createdPose.poseId,
+                      streak: 1,
+                      userId: createdPose.userId,
+                    });
+                  }
+                }}
               />
             </View>
           </View>
@@ -189,7 +209,13 @@ export const CreateNewPose = () => {
         );
       case CreateNewPoseSteps.POSE_DRAW:
         return firstImage ? (
-          <PoseDraw image={firstImage} />
+          <PoseDraw
+            image={firstImage}
+            createdPose={createdPose}
+            setCreatedPose={setCreatedPose}
+            penThickness={penThickness}
+            setPenThickness={setPenThickness}
+          />
         ) : (
           <View>
             <Text>Error while clicking image</Text>

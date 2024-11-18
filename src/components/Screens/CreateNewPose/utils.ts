@@ -29,3 +29,16 @@ export const saveImageToDevice = async (
     );
   }
 };
+
+
+export const getCurrentTime = ()=>{
+  const now = new Date();
+
+const hours = now.getHours();
+const minutes = now.getMinutes();
+
+
+const currentDateWithTime = new Date();
+currentDateWithTime.setHours(hours, minutes, 0, 0); 
+return currentDateWithTime;
+}
