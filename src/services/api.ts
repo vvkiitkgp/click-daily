@@ -1,8 +1,10 @@
 import { Picture, Pose } from "../types"
 import { getFileNameAndType } from "../utils/common";
 
+const API_BASE_URL = 'http://18.179.13.68:3000';
+
 export const createNewPoseApi = async (data: Pose) =>{
-  const result = await fetch('http://localhost:3000/api/createNewPose',{
+  const result = await fetch(`${API_BASE_URL}/api/createNewPose`,{
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
@@ -23,7 +25,7 @@ export const createNewPoseApi = async (data: Pose) =>{
 }
 
 export const modifyPoseByIdApi = async (data: Pose) =>{
-    const result = await fetch('http://localhost:3000/api/modifyPoseById',{
+    const result = await fetch(`${API_BASE_URL}/api/modifyPoseById`,{
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
@@ -63,7 +65,7 @@ export const uploadPictureByPoseIdApi = async (pictureData: Picture) => {
       formData.append('streak', pictureData.streak.toString());
   
       // Send the request to the API endpoint
-      const result = await fetch('http://localhost:3000/api/uploadPictureByPoseId', {
+      const result = await fetch(`${API_BASE_URL}/api/uploadPictureByPoseId`, {
         method: 'POST',
         body: formData,
       });
@@ -86,7 +88,7 @@ export const uploadPictureByPoseIdApi = async (pictureData: Picture) => {
 
   export const getAllPosesApi = async (): Promise<Pose[] | null> => {
     try {
-      const result = await fetch('http://localhost:3000/api/getAllPoses', {
+      const result = await fetch(`${API_BASE_URL}/api/getAllPoses`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -114,7 +116,7 @@ export const uploadPictureByPoseIdApi = async (pictureData: Picture) => {
 
 export const getPoseDetailsByPoseIdApi = async (poseId: string) => {
     try {
-        const result = await fetch(`http://localhost:3000/api/getPoseDetailsByPoseId/:${poseId}`, {
+        const result = await fetch(`${API_BASE_URL}/api/getPoseDetailsByPoseId/:${poseId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -138,7 +140,7 @@ export const getPoseDetailsByPoseIdApi = async (poseId: string) => {
 
 export const getAllPicturesByPoseId = async (poseId: string): Promise<Picture[]> => {
     try {
-      const result = await fetch(`http://localhost:3000/api/getAllPicturesByPoseId/${poseId}`, {
+      const result = await fetch(`${API_BASE_URL}/api/getAllPicturesByPoseId/${poseId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
