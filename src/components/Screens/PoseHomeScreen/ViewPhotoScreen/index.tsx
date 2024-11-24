@@ -36,7 +36,7 @@ export const ViewPhotoScreen = ({ pose, pictureData, withPose }: Props) => {
       >
         <View style={{ width: screenWidth, height: '100%' }}>
           <Image
-            source={require('../../../../../assets/images/mirrorSelfieMock.jpeg')}
+            source={{ uri: pictureData.picture }}
             style={styles.image}
             resizeMode="contain"
           />

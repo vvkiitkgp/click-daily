@@ -34,6 +34,8 @@ export const PoseParentCard = ({ pose }: { pose: Pose }) => {
 
       <View style={styles.contentContainer}>
         <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
           style={{
             color: 'white',
             fontSize: 25,

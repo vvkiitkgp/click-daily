@@ -32,14 +32,23 @@ export const PoseCapture = ({
 }: Props) => {
   // const [hasCameraPermission, setHasCameraPermission] =
   //   useState<boolean>(false);
-  // const [hasMediaLibraryPermission, setHasMediaLibraryPermission] =
-  //   useState<boolean>(false);
+  const [hasMediaLibraryPermission, setHasMediaLibraryPermission] =
+    useState<boolean>(false);
 
   const [facing, setFacing] = useState<CameraType>('back');
   const [flash, setFlash] = useState<FlashMode>('off');
   const cameraRef = useRef<CameraView>(null);
 
   const [permission, requestPermission] = useCameraPermissions();
+
+  useEffect(() => {
+    const permissionCheck = async () => {
+      const { status: currentStatus } =
+        await MediaLibrary.getPermissionsAsync();
+      setHasMediaLibraryPermission(currentStatus === 'granted');
+    };
+    permissionCheck();
+  }, []);
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -58,13 +67,30 @@ export const PoseCapture = ({
     );
   }
 
+  if (!hasMediaLibraryPermission) {
+    // Camera permissions are not granted yet.
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>We need your Media Permission</Text>
+        <Button
+          onPress={async () => {
+            const { status: mediaLibraryStatus } =
+              await MediaLibrary.requestPermissionsAsync();
+            setHasMediaLibraryPermission(mediaLibraryStatus === 'granted');
+          }}
+          title="grant permission"
+        />
+      </View>
+    );
+  }
+
   // useEffect(() => {
   //   (async () => {
-  //     const { status: cameraStatus } =
-  //       await Camera.requestCameraPermissionsAsync();
+  //     // const { status: cameraStatus } =
+  //     //   await Camera.requestCameraPermissionsAsync();
   //     const { status: mediaLibraryStatus } =
   //       await MediaLibrary.requestPermissionsAsync();
-  //     setHasCameraPermission(cameraStatus === 'granted');
+  //     // setHasCameraPermission(cameraStatus === 'granted');
   //     setHasMediaLibraryPermission(mediaLibraryStatus === 'granted');
   //   })();
   // }, []);

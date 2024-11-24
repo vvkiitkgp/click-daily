@@ -18,6 +18,7 @@ import { Pose } from '../../../types';
 import { PosesContext } from '../../../contexts/PosesContext';
 import { useGetAllPoses } from './hooks/useGetAllPoses';
 import { ScrollView } from 'react-native-gesture-handler';
+import Loader from '../../Common/ui/Loader';
 
 type AllPosesState = {
   data: Pose[] | null;
@@ -49,8 +50,15 @@ export const HomeScreen = () => {
         }}
       >
         {loading ? (
-          <View>
-            <Text style={{ fontSize: 15 }}> LOADING ...</Text>
+          <View
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Loader />
           </View>
         ) : (
           <ScrollView style={{ marginTop: 20 }}>
@@ -85,7 +93,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     position: 'absolute',
     right: 10,
-    bottom: 80,
+    bottom: 50,
     backgroundColor: defaultColors.buttonDefault,
   },
 });

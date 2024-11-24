@@ -26,3 +26,13 @@ export const formatPhotosToWeekArray = (
 console.log(formatedPhotosToWeek,"formatedPhotosToWeek formatedPhotosToWeek formatedPhotosToWeek")
   return formatedPhotosToWeek;
 };
+
+export const getDropdownItems = (data: Picture[])=>{
+
+  return data.map((picture)=>{
+    return {
+      label: `Day ${picture.day}`,
+      value: picture.pictureId
+    }
+  })
+}

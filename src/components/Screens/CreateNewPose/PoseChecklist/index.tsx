@@ -185,6 +185,7 @@ const styles = StyleSheet.create({
   sortableContainer: {
     width: '100%',
     marginTop: 10,
+    paddingHorizontal: 20,
   },
   buttonContainer: {
     display: 'flex',

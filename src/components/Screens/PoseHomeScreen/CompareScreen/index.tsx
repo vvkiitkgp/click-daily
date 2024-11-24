@@ -1,142 +1,112 @@
-import React from 'react';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Image } from 'react-native';
+import Slider from '@react-native-community/slider';
 import defaultColors from '../../../../styles/colors';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Pose } from '../../../../types';
+import Dropdown from './Dropdown';
+import { Picture } from '../../../../types';
+import { getDropdownItems } from '../utils';
 
 interface CompareScreenProps {
-  pose: Pose;
-  showCompare: boolean;
+  data: Picture[];
 }
+export const CompareScreen = ({ data }: CompareScreenProps) => {
+  const [value, setValue] = useState(0);
+  const [firstPicture, setFirstPicture] = useState<Picture | undefined>(
+    data[0]
+  );
+  const [secondPicture, setSecondPicture] = useState<Picture | undefined>(
+    data[data.length - 1]
+  );
 
-export const CompareScreen = ({ pose, showCompare }: CompareScreenProps) => {
-  const { createdDate } = pose;
-  const onChange = ({ type }, selectedTime) => {
-    if (type === 'set') {
-      const currentTime = selectedTime;
-    }
-  };
-
-  const renderChoosingDates = () => {
-    return (
-      <View>
-        <Text style={styles.heading}>Choose Dates to Compare!</Text>
-        <View>
-          <Text style={{ color: defaultColors.textColorDefault }}>
-            First Picture Date:
-          </Text>
-          <DateTimePicker
-            display="spinner"
-            value={new Date()}
-            textColor={defaultColors.textColorPrimary}
-            onChange={onChange}
-            minimumDate={new Date(pose.createdDate * 1000)}
-            maximumDate={new Date(new Date().setDate(new Date().getDate() - 1))}
-          />
-        </View>
-        <View>
-          <Text style={{ color: defaultColors.textColorDefault }}>
-            Second Picture Date:
-          </Text>
-          <DateTimePicker
-            display="spinner"
-            value={new Date()}
-            textColor={defaultColors.textColorPrimary}
-            onChange={onChange}
-            minimumDate={
-              new Date(
-                new Date().setDate(
-                  new Date(pose.createdDate * 1000).getDate() + 1
-                )
-              )
-            }
-            maximumDate={new Date()}
-          />
-        </View>
-      </View>
-    );
-  };
-
-  const renderCompare = () => {
-    return (
-      <View style={{ flex: 1 }}>
-        <View
-          style={{
-            flex: 1,
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            zIndex: 0,
-          }}
-        >
-          <Image
-            source={require('../../../../../assets/images/mirrorSelfieMock.jpeg')}
-            style={[styles.image, styles.blueOverlayImage1]}
-            resizeMode="contain"
-          />
-          <View style={styles.blueOverlay} />
-        </View>
-        <View
-          style={{
-            flex: 1,
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            zIndex: 1,
-          }}
-        >
-          <Image
-            source={require('../../../../../assets/images/Logo.png')}
-            style={[styles.image, styles.redOverlayImage2]}
-            resizeMode="contain"
-          />
-          <View style={styles.redOverlay} />
-        </View>
-      </View>
-    );
-  };
+  const dropdownItems = getDropdownItems(data);
 
   return (
-    <View style={styles.container}>
-      {showCompare ? renderCompare() : renderChoosingDates()}
+    <View style={{ flex: 1 }}>
+      <View style={styles.dropdownContainer}>
+        <Dropdown
+          data={dropdownItems}
+          value={firstPicture?.pictureId ?? ''}
+          setValue={(v) => setFirstPicture(data.find((d) => d.pictureId === v))}
+        />
+        <Dropdown
+          data={dropdownItems}
+          value={secondPicture?.pictureId ?? ''}
+          setValue={(v) =>
+            setSecondPicture(data.find((d) => d.pictureId === v))
+          }
+        />
+      </View>
+      <View style={{ backgroundColor: 'white', height: '50%' }}>
+        <View
+          style={{
+            ...styles.imageContainer,
+            left: value,
+          }}
+        >
+          <Image
+            source={{
+              uri: firstPicture?.picture,
+            }}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        </View>
+        <View
+          style={{
+            ...styles.imageContainer,
+            right: value,
+          }}
+        >
+          <Image
+            source={{
+              uri: secondPicture?.picture,
+            }}
+            style={{ ...styles.image, opacity: 0.6 }}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+      <View style={styles.sliderContainer}>
+        <Slider
+          style={styles.slider}
+          minimumValue={0}
+          maximumValue={100}
+          step={1}
+          value={value}
+          onValueChange={(val) => setValue(val)}
+          minimumTrackTintColor={defaultColors.primary}
+          maximumTrackTintColor="#d3d3d3"
+          thumbTintColor={defaultColors.primary}
+        />
+      </View>
     </View>
   );
 };
 
+export default CompareScreen;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  dropdownContainer: {
+    height: '20%',
+    width: '100%',
     display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: defaultColors.backgroundDark,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 30,
+    alignItems: 'center',
   },
-  heading: {
-    fontSize: 50,
-    fontStyle: 'italic',
-    fontFamily: 'Arial',
-    fontWeight: 'bold',
-    color: defaultColors.primary,
-    marginTop: 30,
+  sliderContainer: { height: '10%', justifyContent: 'center' },
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  imageContainer: {
+    height: '100%',
+    width: '50%',
+    position: 'absolute',
   },
   image: {
-    flex: 1,
     width: '100%',
     height: '100%',
-    position: 'absolute', // Position the images absolutely to overlay each other
-  },
-  blueOverlayImage1: {
-    opacity: 0.8, // Set the opacity for the images
-  },
-  redOverlayImage2: {
-    opacity: 0.8, // Set the opacity for the images
-  },
-  redOverlay: {
-    ...StyleSheet.absoluteFillObject, // Overlay the entire parent view
-    backgroundColor: 'rgba(255, 0, 0, 0.2)', // Red color with 60% opacity
-  },
-  blueOverlay: {
-    ...StyleSheet.absoluteFillObject, // Overlay the entire parent view
-    backgroundColor: 'rgba(0, 0, 255, 0.2)', // Blue color with 60% opacity
   },
 });
-export default CompareScreen;

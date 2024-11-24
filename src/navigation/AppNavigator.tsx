@@ -14,7 +14,7 @@ import SignUpScreen from '../components/Screens/SignUpScreen';
 import { Image, Text, View } from 'react-native';
 import { PosesContext, defaultPosesContext } from '../contexts/PosesContext';
 import { Pose } from '../types';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,63 +37,66 @@ const AppNavigator: React.FC = () => {
     <SafeAreaProvider>
       <UserContext.Provider value={{ user, setUser }}>
         <PosesContext.Provider value={{ posesList, setPosesList }}>
-          <NavigationContainer>
-            <Stack.Navigator
-              initialRouteName={NavigationScreens.SIGN_IN_SCREEN}
-              screenOptions={{
-                headerShown: true,
-                headerTransparent: true,
-                headerTitle: '',
-                headerBackTitleVisible: false,
-              }}
-            >
-              <Stack.Screen
-                name={NavigationScreens.POSE_HOME_SCREEN}
-                component={PoseHomeScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name={NavigationScreens.CREATE_NEW_POSE_SCREEN}
-                component={CreateNewPose}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name={NavigationScreens.HOME_SCREEN}
-                component={HomeScreen}
-                options={{
-                  headerTitle: () => (
-                    <View
-                      style={{
-                        width: 250,
-                        height: 44,
-                        backgroundColor: 'red',
-                      }}
-                    >
-                      <Image
-                        source={require('../../assets/images/Logo.png')}
-                        style={{ flex: 1, width: '100%', height: '100%' }}
-                        resizeMode="contain"
-                      />
-                    </View>
-                  ),
+          <SafeAreaView style={{ flex: 1 }}>
+            <NavigationContainer>
+              <Stack.Navigator
+                initialRouteName={NavigationScreens.SIGN_IN_SCREEN}
+                screenOptions={{
+                  headerShown: true,
+                  headerTransparent: true,
+                  headerTitle: '',
+                  headerBackTitleVisible: false,
                 }}
-              />
-              <Stack.Screen
-                name={NavigationScreens.CLICK_TODAY_SCREEN}
-                component={ClickTodayScreen}
-                options={{ headerShown: false }}
-              />
+              >
+                <Stack.Screen
+                  name={NavigationScreens.POSE_HOME_SCREEN}
+                  component={PoseHomeScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name={NavigationScreens.CREATE_NEW_POSE_SCREEN}
+                  component={CreateNewPose}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name={NavigationScreens.HOME_SCREEN}
+                  component={HomeScreen}
+                  options={{
+                    headerTitle: () => (
+                      <View
+                        style={{
+                          width: 250,
+                          height: 44,
+                          backgroundColor: 'red',
+                        }}
+                      >
+                        <Image
+                          source={require('../../assets/images/Logo.png')}
+                          style={{ flex: 1, width: '100%', height: '100%' }}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    ),
+                  }}
+                />
+                <Stack.Screen
+                  name={NavigationScreens.CLICK_TODAY_SCREEN}
+                  component={ClickTodayScreen}
+                  options={{ headerShown: false }}
+                />
 
-              <Stack.Screen
-                name={NavigationScreens.SIGN_IN_SCREEN}
-                component={SignInScreen}
-              />
-              <Stack.Screen
-                name={NavigationScreens.SIGN_UP_SCREEN}
-                component={SignUpScreen}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
+                <Stack.Screen
+                  name={NavigationScreens.SIGN_IN_SCREEN}
+                  component={SignInScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name={NavigationScreens.SIGN_UP_SCREEN}
+                  component={SignUpScreen}
+                />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </SafeAreaView>
         </PosesContext.Provider>
       </UserContext.Provider>
     </SafeAreaProvider>

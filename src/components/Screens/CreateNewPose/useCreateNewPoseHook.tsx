@@ -79,8 +79,21 @@ export const useCreateNewPoseHook = () => {
   ];
 
   const handleMofifyPose = async (data: Pose) => {
-    await modifyPoseByIdApi(data);
+    // await modifyPoseByIdApi(data);
     setCreatedPose(data);
+  };
+
+  const uploadPoseDetails = async (
+    newCreatedPose: Pose
+  ): Promise<{ status: 'ok' | 'error' }> => {
+    try {
+      const data = await modifyPoseByIdApi(newCreatedPose);
+      console.log('New Pose Added!', data);
+      return { status: 'ok' };
+    } catch (err) {
+      console.error('Facing Issue in Creating Pose', err);
+      return { status: 'error' };
+    }
   };
 
   return {
@@ -93,5 +106,6 @@ export const useCreateNewPoseHook = () => {
     setPenThickness,
     createdPose,
     setCreatedPose: handleMofifyPose,
+    uploadPoseDetails,
   };
 };

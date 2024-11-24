@@ -31,6 +31,7 @@ export const CreateNewPose = () => {
     setCreatedPose,
     penThickness,
     setPenThickness,
+    uploadPoseDetails,
   } = useCreateNewPoseHook();
   const navigation = useNavigation();
 
@@ -243,7 +244,12 @@ export const CreateNewPose = () => {
           />
         );
       case CreateNewPoseSteps.POSE_CREATED:
-        return <PoseCreated createdPose={createdPose} />;
+        return (
+          <PoseCreated
+            createdPose={createdPose}
+            uploadPoseDetails={uploadPoseDetails}
+          />
+        );
     }
   };
 

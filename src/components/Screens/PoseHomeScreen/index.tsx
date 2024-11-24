@@ -31,6 +31,9 @@ export enum Features {
 import { RouteProp } from '@react-navigation/native';
 import ViewPhotoScreen from './ViewPhotoScreen';
 import { useGetAllPicturesForPose } from './hooks/useGetAllPicturesForPose';
+import Loader from '../../Common/ui/Loader';
+import { BackButton } from '../../Common/ui/IconButton/BackButton';
+import IconButton, { CustomIconButton } from '../../Common/ui/IconButton';
 
 type RootStackParamList = {
   // Define your screen names here
@@ -53,17 +56,27 @@ export const PoseHomeScreen = ({ route }: Props) => {
   const [selectedPictureData, setSelectedPictureData] =
     useState<Picture | null>(null);
   const insets = useSafeAreaInsets();
-  console.log(pose.poseId, 'poseId poseId poseId pose RRRRRRR');
   const { data, loading, error } = useGetAllPicturesForPose(pose.poseId);
 
-  if (loading) return <Text>Loading...</Text>;
+  if (loading)
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: defaultColors.backgroundDark,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Loader />
+      </View>
+    );
   if (error) return <Text>Error: {error.message}</Text>;
-
-  console.log('FROM HEEREE', data, 'THE PHOTOSSS DATA');
 
   // const screenHeight = Dimensions.get('window').height - insets.top;
   const screenHeight = Dimensions.get('window').height;
-  const photoGridContainerHeight = screenHeight * 0.65;
+  const photoGridContainerHeight = screenHeight * 0.5;
   const actionButtonsContainerHeight = screenHeight * 0.35;
 
   const onBack = () => {
@@ -96,35 +109,41 @@ export const PoseHomeScreen = ({ route }: Props) => {
     );
   };
 
-  const getPicturesForWeek = (p: PictureInAWeek) => {
+  const getPicturesForWeek = (p: PictureInAWeek, isFirstWeek?: boolean) => {
     return (
       <View
         style={{
           display: 'flex',
           flexDirection: 'row',
-          width: (photoGridContainerHeight / 3) * 7,
+          width: (photoGridContainerHeight / 3) * 7 + 100,
         }}
       >
         <View
           style={{
             display: 'flex',
-            justifyContent: 'center',
+            // justifyContent: 'center',
             alignItems: 'center',
-            width: 30,
+            width: 100,
             height: 80,
           }}
         >
-          <View>
-            <Text
-              style={{
-                transform: [{ rotate: '270deg' }],
-                fontSize: 20,
-                color: defaultColors.textColorPrimary,
-                width: photoGridContainerHeight / 3,
-                height: 30,
-              }}
-            >{`WEEK ${p.week}`}</Text>
-          </View>
+          <Text
+            style={{
+              marginTop: 10,
+              // transform: [{ rotate: '270deg' }],
+              fontSize: 20,
+              color: defaultColors.textColorPrimary,
+              // width: photoGridContainerHeight / 3,
+              height: 30,
+            }}
+          >{`WEEK ${p.week}`}</Text>
+          <Text
+            style={{
+              fontSize: 15,
+              color: defaultColors.textColorDefault,
+              height: 30,
+            }}
+          >{`3/4 Days`}</Text>
         </View>
 
         {p.photos.map((p) => {
@@ -252,7 +271,7 @@ export const PoseHomeScreen = ({ route }: Props) => {
   const renderActiveScreen = () => {
     switch (activeScreen) {
       case Features.COMPARE:
-        return <CompareScreen pose={pose} showCompare />;
+        return <CompareScreen pose={pose} showCompare data={data} />;
       case Features.EDIT_POSE:
         return <View></View>;
       case Features.CHECKLIST_RESULT:
@@ -262,9 +281,9 @@ export const PoseHomeScreen = ({ route }: Props) => {
       case Features.VIEW_PHOTO:
         return (
           <ViewPhotoScreen
+            withPose={withPoseActive}
             pose={pose}
             pictureData={selectedPictureData}
-            withPose={withPoseActive}
           />
         );
     }
@@ -273,14 +292,22 @@ export const PoseHomeScreen = ({ route }: Props) => {
 
   return (
     <View style={styles.container}>
+      <BackButton onBack={onBack} />
       <SafeAreaView style={styles.safeAreaView}>
         <View style={styles.header}>
-          <MaterialIcons
-            name="arrow-back-ios-new"
-            color={defaultColors.iconColorDefault}
-            size={20}
-            onPress={onBack}
-          />
+          <View style={styles.backButtonSpace} />
+          <View style={styles.poseNameContainer}>
+            <Text
+              style={styles.poseNameText}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {pose.name}
+            </Text>
+          </View>
+          <View style={styles.backButtonSpace}>
+            <IconButton onPress={() => {}} name="dots-vertical" size={25} />
+          </View>
         </View>
         {activeScreen === null ? (
           data.length ? (
@@ -299,7 +326,7 @@ export const PoseHomeScreen = ({ route }: Props) => {
                       width: (photoGridContainerHeight / 3) * 7,
                     }}
                   >
-                    {getPicturesForWeek(formatPhotosToWeekArray(data)[0])}
+                    {getPicturesForWeek(formatPhotosToWeekArray(data)[0], true)}
                   </View>
 
                   <View
@@ -347,19 +374,19 @@ const styles = StyleSheet.create({
   headerContainer: {
     display: 'flex',
     height: 50,
-    backgroundColor: 'red',
     zIndex: 100,
   },
   header: {
     display: 'flex',
     flexDirection: 'row',
-    height: 30,
+    height: 50,
     alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 10,
   },
   safeAreaView: {
     flex: 1,
     display: 'flex',
-    marginTop: 5,
     flexDirection: 'column',
   },
   weekDayContainer: {
@@ -382,7 +409,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     position: 'absolute',
-    bottom: 50,
+    bottom: 15,
   },
   iconContainer: {
     display: 'flex',
@@ -394,4 +421,21 @@ const styles = StyleSheet.create({
     borderColor: defaultColors.borderPrimary,
     borderRadius: '50%',
   },
+  backButtonSpace: {
+    width: '10%',
+  },
+  poseNameContainer: {
+    width: '80%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  poseNameText: {
+    fontSize: 20,
+    fontStyle: 'italic',
+    fontFamily: 'Arial',
+    fontWeight: 'bold',
+    color: defaultColors.primary,
+  },
+  optionsContainer: { width: '10%' },
 });

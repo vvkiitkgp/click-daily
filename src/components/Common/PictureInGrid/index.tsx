@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image } from 'react-native';
 import { Picture } from '../../../types';
 import defaultColors from '../../../styles/colors';
 import { Fontisto } from '@expo/vector-icons';
+import SkeletonLoader from '../ui/Loader/CustomSkeleton';
 
 interface Props {
   size: number;
@@ -10,6 +11,7 @@ interface Props {
   onPress: (pictureData: Picture) => void;
 }
 export const PictureInGrid = ({ size, pictureData, onPress }: Props) => {
+  const [loading, setLoading] = useState(true);
   const getSkin = () => {
     return (
       <View style={{ ...styles.contentSkin, height: size, width: size }}>
@@ -49,10 +51,15 @@ export const PictureInGrid = ({ size, pictureData, onPress }: Props) => {
       }}
       onPress={() => onPress(pictureData)}
     >
+      {loading && (
+        <SkeletonLoader borderRadius={10} height={size} width={size} />
+      )}
       <Image
-        source={{ uri: pictureData.picture }}
+        source={{ uri: pictureData.picture, cache: 'force-cache' }}
         style={{ width: size, height: size }}
         resizeMode="contain"
+        onLoadStart={() => setLoading(true)}
+        onLoadEnd={() => setLoading(false)}
       />
       {getSkin()}
     </TouchableOpacity>

@@ -9,18 +9,33 @@ import { PosesContext } from '../../../../contexts/PosesContext';
 
 interface PoseCreatedProps {
   createdPose: Pose;
+  uploadPoseDetails: (p: Pose) => Promise<{ status: 'ok' | 'error' }>;
 }
-export const PoseCreated = ({ createdPose }: PoseCreatedProps) => {
+export const PoseCreated = ({
+  createdPose,
+  uploadPoseDetails,
+}: PoseCreatedProps) => {
   const navigation = useNavigation();
   const { posesList, setPosesList } = useContext(PosesContext);
-  // TODO api call
-  setTimeout(() => {
-    navigation.navigate(NavigationScreens.HOME_SCREEN as never);
-  }, 3000);
 
   useEffect(() => {
+    const uploadPose = async () => {
+      await uploadPoseDetails(createdPose)
+        .then((data) => {
+          if (data.status === 'ok') {
+            setPosesList([...posesList, createdPose]);
+            navigation.navigate(NavigationScreens.HOME_SCREEN as never);
+          } else {
+            // TODO: add something went wrong, and a action for user when something goes wrong
+            console.error('Something Went Wrong!');
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
     if (createdPose) {
-      setPosesList([...posesList, createdPose]);
+      uploadPose();
     }
   }, []);
 
