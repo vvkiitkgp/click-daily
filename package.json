@@ -8,6 +8,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@aws-amplify/auth": "^6.9.0",
     "@dudigital/react-native-zoomable-view": "^1.1.4",
     "@expo-google-fonts/roboto": "^0.2.3",
     "@expo/vector-icons": "^14.0.2",
@@ -22,6 +23,7 @@
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/stack": "^6.3.20",
     "@rneui/themed": "^4.0.0-rc.8",
+    "aws-amplify": "^6.11.0",
     "axios": "^1.6.8",
     "deprecated-react-native-prop-types": "^5.0.0",
     "expo": "^52.0.23",
