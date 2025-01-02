@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import SortabelList from 'react-native-sortable-list';
 import defaultColors from '../../../../styles/colors';
@@ -7,17 +7,27 @@ import { ChecklistItem, Pose } from '../../../../types';
 import { PoseParentCard } from '../../../Common/PoseParentCard';
 import CheckListItemCard from '../../../Common/CheckListItemCard';
 import Button from '../../../Common/ui/Button';
+import { PhotoCard } from '../common/PhotoCard';
+import { Colors, useTheme } from '../../../../hooks/useTheme';
+import { ActionButton } from '../../../Common/ui/ActionButton';
+import Divider from '../../../Common/ui/Divider';
 
 interface PoseChecklistProp {
   createdPose: Pose;
   setCreatedPose: (p: Pose) => void;
+  image: string | null
 }
 export const PoseChecklist = ({
   createdPose,
   setCreatedPose,
+  image
 }: PoseChecklistProp) => {
   const [isEditItemId, setIsEditItemId] = useState<string>();
   const [isSorting, setIsSorting] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const { colors } = useTheme();
+  const styles = getStyles(colors)
 
   // TODO Check on Sorting is it
   const onChange = (nextOrder: number[]) => {
@@ -32,6 +42,19 @@ export const PoseChecklist = ({
 
     tempCheckList.sort((a, b) => a.index - b.index);
     setCreatedPose({ ...createdPose, checklist: tempCheckList });
+  };
+
+  // const handleScrollToEnd = () => {
+  //   scrollViewRef.current?.scrollToEnd({ animated: true });
+  // };
+
+  const handleScrollToEnd = () => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollTo({
+        y: 9999, // A large value to ensure it scrolls to the very end
+        animated: true,
+      });
+    }, 100); // Ensure content has rendered
   };
 
   const onCheck = (id: string) => {
@@ -73,6 +96,7 @@ export const PoseChecklist = ({
         },
       ],
     });
+    handleScrollToEnd()
   };
 
   const onAddCountItem = () => {
@@ -93,6 +117,7 @@ export const PoseChecklist = ({
         },
       ],
     });
+    handleScrollToEnd()
   };
 
   const onSave = (item: ChecklistItem) => {
@@ -117,16 +142,27 @@ export const PoseChecklist = ({
   };
 
   return (
-    <ScrollView scrollEnabled={!isSorting}>
+    <ScrollView ref={scrollViewRef} scrollEnabled={!isSorting} >
       <View style={styles.container}>
-        <View pointerEvents="none">
-          <PoseParentCard pose={createdPose} />
-        </View>
-        <View style={styles.nameContainer}>
-          <Text style={styles.heading}>Create Your Daily Checklist!</Text>
+        <PhotoCard photoUrl={image} />
+        <Divider overrideStyles={{ width: '90%', marginVertical: 21 }} />
+        <Text style={styles.heading}>Create Checklist</Text>
+        <View style={styles.buttonContainer}>
+          <ActionButton variant='default' label='Checklist' onPress={onAddNewCheckListItem} leftIcon={<Fontisto name='plus-a' color={colors.containerBackground} />} />
+          <ActionButton variant='default' label='Count' onPress={onAddCountItem} leftIcon={<Fontisto name='plus-a' color={colors.containerBackground} />} />
         </View>
         <View style={styles.sortableContainer}>
-          <SortabelList
+          {createdPose.checklist.map((data, index) => <CheckListItemCard
+            key={index}
+            isEdit={data.id === isEditItemId}
+            setIsEdit={setIsEditItemId}
+            item={data}
+            onCheckCallback={onCheck}
+            onCountChangeCallack={onCountChange}
+            onSaveCallback={onSave}
+            onDeleteCallback={onDelete}
+          />)}
+          {/* <SortabelList
             key={createdPose.checklist.length}
             data={createdPose.checklist}
             onActivateRow={() => setIsSorting(true)}
@@ -142,53 +178,39 @@ export const PoseChecklist = ({
                 onDeleteCallback={onDelete}
               />
             )}
-            // onChangeOrder={onChange}
-          />
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <Button
-            name="Check list"
-            onPress={onAddNewCheckListItem}
-            width={105}
-            leftIcon="plus-a"
-          />
-          <Button
-            name="Count"
-            leftIcon="plus-a"
-            width={100}
-            onPress={onAddCountItem}
-          />
+          // onChangeOrder={onChange}
+          /> */}
         </View>
       </View>
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Colors) => StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 120,
     alignItems: 'center',
-  },
-  nameContainer: {
-    marginTop: 20,
-    width: 350,
-  },
-  heading: {
-    fontSize: 40,
-    fontStyle: 'italic',
-    fontFamily: 'Arial',
-    fontWeight: 'bold',
-    color: defaultColors.primary,
+    marginTop: 50,
   },
   sortableContainer: {
     width: '100%',
     marginTop: 10,
+    marginBottom: 20,
     paddingHorizontal: 20,
+    display: 'flex',
+    gap: 10
   },
   buttonContainer: {
     display: 'flex',
     flexDirection: 'row',
+    gap: 4
   },
+  heading: {
+    color: colors.defaultText,
+    fontSize: 16,
+    marginBottom: 12,
+    alignSelf: 'flex-start',
+    paddingLeft: '5%',
+    fontWeight: '600'
+  }
 });

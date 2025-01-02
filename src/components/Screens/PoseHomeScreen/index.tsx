@@ -7,13 +7,15 @@ import {
   Dimensions,
   ScrollView,
   SafeAreaView,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import PictureInGrid from '../../Common/PictureInGrid';
 import { content } from './content';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import defaultColors from '../../../styles/colors';
 import { formatPhotosToWeekArray } from './utils';
-import { Picture, PictureInAWeek, Pose } from '../../../types';
+import { Picture, PictureInAWeek, Pose, SubActions } from '../../../types';
 import { picturesMock } from '../../../mocks/databaseMocks';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -33,7 +35,12 @@ import ViewPhotoScreen from './ViewPhotoScreen';
 import { useGetAllPicturesForPose } from './hooks/useGetAllPicturesForPose';
 import Loader from '../../Common/ui/Loader';
 import { BackButton } from '../../Common/ui/IconButton/BackButton';
-import IconButton, { CustomIconButton } from '../../Common/ui/IconButton';
+import IconButton from '../../Common/ui/IconButton';
+import ThreeDotsMenu from '../../Common/ThreeDotMenu';
+import { Colors, useTheme } from '../../../hooks/useTheme';
+import { ActionButton } from '../../Common/ui/ActionButton';
+import { ActionsOverlay } from './ActionsOverlay';
+import { useGetPoseDetails } from '../../../hooks/useGetPoseDetails';
 
 type RootStackParamList = {
   // Define your screen names here
@@ -55,15 +62,21 @@ export const PoseHomeScreen = ({ route }: Props) => {
   const [activeScreen, setActiveScreen] = useState<Features | null>(null);
   const [selectedPictureData, setSelectedPictureData] =
     useState<Picture | null>(null);
+  const [selectedSubAction, setSelectedSubAction] = useState<SubActions>('compare');
+  const [selectedMonth, setSelectedMonth] = useState<number>(1);
   const insets = useSafeAreaInsets();
+  const [isActionModalOpen, setIsActionModalOpen] = useState<boolean>(false)
   const { data, loading, error } = useGetAllPicturesForPose(pose.poseId);
+  const { data: poseData, loading: poseDataLoading, error: poseDataError } = useGetPoseDetails(pose.poseId)
+  const { colors } = useTheme();
+  const styles = getStyles(colors)
 
-  if (loading)
+  if (loading || poseDataLoading)
     return (
       <View
         style={{
           flex: 1,
-          backgroundColor: defaultColors.backgroundDark,
+          backgroundColor: colors.containerBackground,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -73,6 +86,8 @@ export const PoseHomeScreen = ({ route }: Props) => {
       </View>
     );
   if (error) return <Text>Error: {error.message}</Text>;
+  if (poseDataError) return <Text>Error: {poseDataError.message}</Text>;
+
 
   // const screenHeight = Dimensions.get('window').height - insets.top;
   const screenHeight = Dimensions.get('window').height;
@@ -94,7 +109,7 @@ export const PoseHomeScreen = ({ route }: Props) => {
         style={{
           height: photoGridContainerHeight / 3,
           width: photoGridContainerHeight / 3,
-          backgroundColor: defaultColors.backgroundDark,
+          backgroundColor: colors.containerBackground
         }}
       >
         <PictureInGrid
@@ -111,44 +126,47 @@ export const PoseHomeScreen = ({ route }: Props) => {
 
   const getPicturesForWeek = (p: PictureInAWeek, isFirstWeek?: boolean) => {
     return (
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          width: (photoGridContainerHeight / 3) * 7 + 100,
-        }}
-      >
+      <View style={{ marginBottom: 12 }}>
         <View
           style={{
             display: 'flex',
             // justifyContent: 'center',
+            flexDirection: 'row',
             alignItems: 'center',
-            width: 100,
-            height: 80,
+            gap: 10,
+            marginBottom: 8
           }}
         >
           <Text
             style={{
-              marginTop: 10,
               // transform: [{ rotate: '270deg' }],
               fontSize: 20,
-              color: defaultColors.textColorPrimary,
+              color: colors.defaultText,
+              fontWeight: '600'
               // width: photoGridContainerHeight / 3,
-              height: 30,
             }}
           >{`WEEK ${p.week}`}</Text>
-          <Text
-            style={{
-              fontSize: 15,
-              color: defaultColors.textColorDefault,
-              height: 30,
-            }}
-          >{`3/4 Days`}</Text>
+          <View style={{ backgroundColor: colors.streakBackground, borderRadius: 10, height: 20, width: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Text
+              style={{
+                fontSize: 12,
+                color: colors.defaultText,
+              }}
+            >{`3/4 Days`}</Text>
+          </View>
         </View>
-
-        {p.photos.map((p) => {
-          return getPictureInGridItems(p);
-        })}
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            width: (photoGridContainerHeight / 3) * 7 + 100,
+            height: 200
+          }}
+        >
+          {p.photos.map((p) => {
+            return getPictureInGridItems(p);
+          })}
+        </View>
       </View>
     );
   };
@@ -306,17 +324,20 @@ export const PoseHomeScreen = ({ route }: Props) => {
             </Text>
           </View>
           <View style={styles.backButtonSpace}>
-            <IconButton onPress={() => {}} name="dots-vertical" size={25} />
+            <ThreeDotsMenu poseId={pose.poseId} />
           </View>
         </View>
         {activeScreen === null ? (
           data.length ? (
             <View
               style={{
-                ...styles.photoGridContainer,
-                height: photoGridContainerHeight,
               }}
             >
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} >
+                <View style={styles.monthSelectionContainer}>
+                  {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'].map((item, index) => <ActionButton label={item} variant={selectedMonth === index + 1 ? 'selected' : 'options'} onPress={() => setSelectedMonth(index + 1)} />)}
+                </View>
+              </ScrollView>
               <ScrollView horizontal>
                 <View>
                   <View
@@ -331,7 +352,6 @@ export const PoseHomeScreen = ({ route }: Props) => {
 
                   <View
                     style={{
-                      height: (photoGridContainerHeight / 3) * 2, // Adjusted height to match two rows
                       overflow: 'hidden',
                     }}
                   >
@@ -357,7 +377,13 @@ export const PoseHomeScreen = ({ route }: Props) => {
           renderActiveScreen()
         )}
 
-        {getActionButtons()}
+        {/* {getActionButtons()} */}
+        {poseData &&
+          <View style={styles.actionButtonContainer}>
+            <ActionButton variant='primary' label='Actions' onPress={() => setIsActionModalOpen(true)} />
+            <ActionsOverlay open={isActionModalOpen} setOpen={setIsActionModalOpen} selectedSubAction={selectedSubAction} setSelectedSubAction={setSelectedSubAction} pose={poseData} />
+          </View>
+        }
       </SafeAreaView>
     </View>
   );
@@ -365,11 +391,12 @@ export const PoseHomeScreen = ({ route }: Props) => {
 
 export default PoseHomeScreen;
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Colors) => StyleSheet.create({
   container: {
     flex: 1,
     display: 'flex',
-    backgroundColor: defaultColors.backgroundDark,
+    backgroundColor: colors.containerBackground,
+    padding: 15
   },
   headerContainer: {
     display: 'flex',
@@ -392,7 +419,7 @@ const styles = StyleSheet.create({
   weekDayContainer: {
     width: 20,
     borderRightWidth: 1,
-    borderRightColor: 'black',
+    borderRightColor: colors.solidBorder,
     marginRight: 10,
   },
   scrollView: {
@@ -404,12 +431,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // Items will wrap to the top
     justifyContent: 'space-between', // Adjust the alignment as needed
   },
-  photoGridContainer: {},
   actionButtonContainer: {
     display: 'flex',
     flexDirection: 'column',
     position: 'absolute',
     bottom: 15,
+    alignSelf: 'center'
   },
   iconContainer: {
     display: 'flex',
@@ -418,8 +445,8 @@ const styles = StyleSheet.create({
     height: 40,
     width: 40,
     borderWidth: 2,
-    borderColor: defaultColors.borderPrimary,
-    borderRadius: '50%',
+    borderColor: colors.solidBorder,
+    borderRadius: 20,
   },
   backButtonSpace: {
     width: '10%',
@@ -435,7 +462,14 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     fontFamily: 'Arial',
     fontWeight: 'bold',
-    color: defaultColors.primary,
+    color: colors.defaultText,
   },
   optionsContainer: { width: '10%' },
+  monthSelectionContainer: {
+    height: 28,
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 20
+  }
 });

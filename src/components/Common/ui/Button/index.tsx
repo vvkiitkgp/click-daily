@@ -10,6 +10,7 @@ import {
 import defaultColors from '../../../../styles/colors';
 import { Fontisto } from '@expo/vector-icons';
 
+
 interface ButtonProps {
   style?: StyleProp<ViewStyle>;
   onPress: () => void;
@@ -46,13 +47,13 @@ export const Button = ({
           borderColor: primary
             ? defaultColors.buttonBorderPrimary
             : secondary
-            ? defaultColors.buttonBorderSecondary
-            : 'black',
+              ? defaultColors.buttonBorderSecondary
+              : 'black',
           backgroundColor: primary
             ? defaultColors.buttonPrimary
             : secondary
-            ? defaultColors.buttonSecondary
-            : 'grey',
+              ? defaultColors.buttonSecondary
+              : 'grey',
           ...(typeof style === 'object' && style !== null ? style : {}),
         }}
         onPress={onPress}
@@ -72,6 +73,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     display: 'flex',
     flexDirection: 'row',
+    // width:'100%'
   },
 });
 

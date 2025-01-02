@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import defaultColors from '../../../styles/colors';
 import PoseCapture from './PoseCapture';
 import PoseDraw from './PoseDraw';
-import { Fontisto } from '@expo/vector-icons';
 import { saveImageToDevice } from './utils';
-import { Slider } from 'react-native-elements';
 import {
   useCreateNewPoseHook,
   CreateNewPoseSteps,
 } from './useCreateNewPoseHook';
-import { CreatePoseName } from './CreatePoseName';
+import { CreatePoseDetails } from './CreatePoseDetails';
 import { PoseReminder } from './PoseReminder';
 import { PoseCreated } from './PoseCreated';
 import { PoseChecklist } from './PoseChecklist';
-import { uploadPictureByPoseIdApi } from '../../../services/api';
+import { addDailyChecklist, uploadPictureByPoseIdApi } from '../../../services/api';
 import { generateNewUuid } from '../../../utils/generateNewUuid';
+import { BackButton } from '../../Common/ui/IconButton/BackButton';
+import { ActionBar } from '../../Common/ActionBar';
+import { Colors, useTheme } from '../../../hooks/useTheme';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export const CreateNewPose = () => {
   const {
@@ -34,11 +36,22 @@ export const CreateNewPose = () => {
     uploadPoseDetails,
   } = useCreateNewPoseHook();
   const navigation = useNavigation();
+  const [factId, setFactId] = useState<string>()
+  const { colors } = useTheme()
+  const styles = getStyles(colors)
 
-  const onPrimaryCtaPress = () => {
+  const onPrimaryCtaPress = async () => {
     const currentIndex = stepsOrder.indexOf(step);
     const nextIndex = (currentIndex + 1) % stepsOrder.length;
-    setStep(stepsOrder[nextIndex]);
+    if (step === CreateNewPoseSteps.POSE_CHECKLIST) { // TODO Look  at this logic
+      if (createdPose?.checklist && factId) {
+        await addDailyChecklist(createdPose?.checklist, factId, createdPose?.poseId).then(() => {
+          setStep(stepsOrder[nextIndex]);
+        }).catch(e => console.error(e))
+      }
+    } else {
+      setStep(stepsOrder[nextIndex]);
+    }
   };
 
   const onSecondaryCtaPress = () => {
@@ -47,169 +60,76 @@ export const CreateNewPose = () => {
     setStep(stepsOrder[nextIndex]);
   };
 
+
+  const onBack = () => {
+    if (step === CreateNewPoseSteps.POSE_CAPTURE) {
+      if (!firstImage) {
+        navigation.goBack()
+      } else {
+        setFirstImage(null)
+      }
+    } else {
+      onSecondaryCtaPress()
+    }
+  }
+
+  const onUploadPicture = async () => {
+    if (firstImage) {
+      saveImageToDevice(firstImage, setFirstImage, () =>
+        setStep(CreateNewPoseSteps.POSE_DRAW)
+      );
+      if (
+        createdPose?.createdDate &&
+        createdPose?.poseId &&
+        createdPose?.userId
+      ) {
+        const idforFact = generateNewUuid();
+        setFactId(idforFact.toString());
+        await uploadPictureByPoseIdApi({
+          date: createdPose.createdDate,
+          day: 1,
+          picture: firstImage,
+          pictureId: generateNewUuid().toString(),
+          poseId: createdPose.poseId,
+          streak: 1,
+          userId: createdPose.userId,
+        }, idforFact.toString());
+      }
+    }
+  }
+
   const getActionBar = () => {
     if (step === CreateNewPoseSteps.POSE_CAPTURE) {
       if (!firstImage) {
-        return (
-          <View
-            style={{
-              position: 'absolute',
-              height: 30,
-              width: 30,
-              backgroundColor: 'grey',
-              top: 70,
-              left: '5%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 30,
-              zIndex: 999,
-            }}
-          >
-            <Fontisto
-              name="arrow-left"
-              size={20}
-              color="white"
-              onPress={() => navigation.goBack()}
-            />
-          </View>
-        );
+        return (<></>)
       } else {
         return (
-          <View
-            style={{
-              position: 'absolute',
-              height: 30,
-              width: '90%',
-              backgroundColor: 'grey',
-              top: 70,
-              left: '5%',
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 30,
-              paddingLeft: '3%',
-              paddingRight: '3%',
-              zIndex: 999,
-            }}
-          >
-            <View style={{ width: '50%' }}>
-              <Fontisto
-                name="camera"
-                size={20}
-                color="white"
-                onPress={() => setFirstImage(null)}
-              />
-            </View>
-            <View
-              style={{
-                width: '50%',
-                display: 'flex',
-                alignItems: 'flex-end',
-              }}
-            >
-              <Fontisto
-                name="check"
-                size={20}
-                color="white"
-                onPress={async () => {
-                  console.log('YOO YOO HERE');
-                  saveImageToDevice(firstImage, setFirstImage, () =>
-                    setStep(CreateNewPoseSteps.POSE_DRAW)
-                  );
-                  if (
-                    createdPose?.createdDate &&
-                    createdPose?.poseId &&
-                    createdPose?.userId
-                  ) {
-                    await uploadPictureByPoseIdApi({
-                      date: createdPose.createdDate,
-                      day: 1,
-                      picture: firstImage,
-                      pictureId: generateNewUuid().toString(),
-                      poseId: createdPose.poseId,
-                      streak: 1,
-                      userId: createdPose.userId,
-                    });
-                  }
-                }}
-              />
-            </View>
-          </View>
+          <ActionBar primaryText="Next"
+            onPrimaryClick={onUploadPicture} />
         );
       }
     } else if (step === CreateNewPoseSteps.POSE_CREATED) {
-      return <View></View>;
+      return (<></>)
     } else {
       return (
-        <View
-          style={{
-            position: 'absolute',
-            height: 30,
-            width: '90%',
-            backgroundColor: 'grey',
-            top: 70,
-            left: '5%',
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: 30,
-            paddingLeft: '3%',
-            paddingRight: '3%',
-            zIndex: 999,
-          }}
-        >
-          <View
-            style={{
-              width: '50%',
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 20,
-              alignItems: 'center',
-            }}
-          >
-            <Fontisto
-              name="arrow-left"
-              size={20}
-              color="white"
-              onPress={onSecondaryCtaPress}
-            />
-          </View>
-          <View
-            style={{
-              width: '50%',
-              display: 'flex',
-              alignItems: 'flex-end',
-            }}
-          >
-            <Fontisto
-              name="check"
-              size={20}
-              color="white"
-              onPress={onPrimaryCtaPress}
-            />
-          </View>
-        </View>
+        <ActionBar primaryText="Next"
+          onPrimaryClick={onPrimaryCtaPress} />
       );
     }
-
     return <View></View>;
   };
 
   const getStepContent = () => {
     switch (step) {
       case CreateNewPoseSteps.POSE_CAPTURE:
-        return (
-          <PoseCapture
-            setPoseCaptureImage={setFirstImage}
-            onNextCallback={onPrimaryCtaPress}
-            image={firstImage}
-          />
-        );
+        return <PoseCapture
+          setPoseCaptureImage={setFirstImage}
+          onNextCallback={onPrimaryCtaPress}
+          image={firstImage}
+          enableFilter={false}
+        />
       case CreateNewPoseSteps.POSE_DRAW:
-        return firstImage ? (
+        return firstImage && createdPose ? (
           <PoseDraw
             image={firstImage}
             createdPose={createdPose}
@@ -222,49 +142,52 @@ export const CreateNewPose = () => {
             <Text>Error while clicking image</Text>
           </View>
         );
-      case CreateNewPoseSteps.POSE_NAME:
-        return (
-          <CreatePoseName
+      case CreateNewPoseSteps.POSE_DETAILS:
+        return createdPose ? (
+          <CreatePoseDetails
             createdPose={createdPose}
             setCreatedPose={setCreatedPose}
+            image={firstImage}
           />
-        );
-      case CreateNewPoseSteps.POSE_REMINDER:
-        return (
-          <PoseReminder
-            createdPose={createdPose}
-            setCreatedPose={setCreatedPose}
-          />
-        );
+        ) : null;
       case CreateNewPoseSteps.POSE_CHECKLIST:
-        return (
+        return createdPose ? (
           <PoseChecklist
             createdPose={createdPose}
             setCreatedPose={setCreatedPose}
+            image={firstImage}
           />
-        );
+        ) : null;
       case CreateNewPoseSteps.POSE_CREATED:
-        return (
+        return createdPose ? (
           <PoseCreated
             createdPose={createdPose}
             uploadPoseDetails={uploadPoseDetails}
           />
-        );
+        ) : null;
     }
   };
 
   return (
     <View style={styles.container}>
-      {getActionBar()}
-      {getStepContent()}
+      <BackButton onBack={onBack} />
+      <View style={styles.childContainer}>
+        <View style={{ height: screenWidth * (5 / 3), width: screenWidth, backgroundColor: 'white' }}>
+          {getStepContent()}
+        </View>
+      </View>
+      {firstImage && <View style={styles.actionBarContainer}>
+        {getActionBar()}
+      </View>}
+
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: defaultColors.backgroundDark,
+    backgroundColor: colors.containerBackground,
   },
   sliderTrackStyle: {
     width: 0,
@@ -280,6 +203,17 @@ const styles = StyleSheet.create({
     width: 20,
     backgroundColor: 'blue',
   },
+  childContainer: {
+    flex: 0.9,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionBarContainer: {
+    flex: 0.1,
+    borderTopColor: colors.solidBorder,
+    borderTopWidth: 1
+  }
 });
 
 export default CreateNewPose;

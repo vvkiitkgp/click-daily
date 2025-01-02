@@ -10,7 +10,7 @@ import { PoseParentCard } from '../../Common/PoseParentCard';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import defaultColors from '../../../styles/colors';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NavigationScreens } from '../../../navigation/AppNavigator';
 import { UserContext } from '../../../contexts/UserContext';
 import { getAllPosesApi } from '../../../services/api';
@@ -19,6 +19,8 @@ import { PosesContext } from '../../../contexts/PosesContext';
 import { useGetAllPoses } from './hooks/useGetAllPoses';
 import { ScrollView } from 'react-native-gesture-handler';
 import Loader from '../../Common/ui/Loader';
+import { Colors, useTheme } from '../../../hooks/useTheme';
+import ProfileCardMini from '../../Common/ProfileCardMini';
 
 type AllPosesState = {
   data: Pose[] | null;
@@ -31,7 +33,16 @@ export const HomeScreen = () => {
   const { user } = useContext(UserContext);
 
   const { posesList, setPosesList } = useContext(PosesContext);
-  const { data, loading, error } = useGetAllPoses();
+  const { data, loading, error, refetch } = useGetAllPoses();
+
+  const { colors } = useTheme()
+  const styles = getStyles(colors);
+  // Refetch poses when the screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   useEffect(() => {
     if (data) {
@@ -46,7 +57,7 @@ export const HomeScreen = () => {
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          backgroundColor: 'black',
+          backgroundColor: colors.containerBackground,
         }}
       >
         {loading ? (
@@ -61,11 +72,21 @@ export const HomeScreen = () => {
             <Loader />
           </View>
         ) : (
-          <ScrollView style={{ marginTop: 20 }}>
-            {posesList?.map((pose) => {
-              return <PoseParentCard pose={pose} />;
-            })}
+          <ScrollView style={styles.scrollableContainer}>
+            <View>
+              <View style={styles.profileCardContainer}>
+                <ProfileCardMini />
+              </View>
+              <Text style={styles.activityText}>Activity</Text>
+              <View style={styles.posesListContainer}>
+                {posesList?.map((pose) => {
+                  return <PoseParentCard pose={pose} />;
+                })}
+                <View style={{ height: 200 }} />
+              </View>
+            </View>
           </ScrollView>
+
         )}
 
         <TouchableOpacity
@@ -83,7 +104,7 @@ export const HomeScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Colors) => StyleSheet.create({
   createNewPoseFab: {
     height: 50,
     width: 170,
@@ -96,6 +117,20 @@ const styles = StyleSheet.create({
     bottom: 50,
     backgroundColor: defaultColors.buttonDefault,
   },
+  activityText: {
+    fontSize: 24,
+    color: colors.defaultText
+  },
+  posesListContainer: {
+
+  },
+  scrollableContainer: {
+    marginTop: 20,
+    paddingHorizontal: 15
+  },
+  profileCardContainer: {
+    marginBottom: 10
+  }
 });
 
 export default HomeScreen;

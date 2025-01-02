@@ -5,19 +5,23 @@ import { NavigationScreens } from '../../../navigation/AppNavigator';
 import { PoseFilter } from './PoseFilter';
 import { Pose } from '../../../types';
 import defaultColors from '../../../styles/colors';
-import { Fontisto } from '@expo/vector-icons';
+import { Fontisto, FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { Colors, useTheme } from '../../../hooks/useTheme';
+import Streak from '../Streak';
 
 export const PoseParentCard = ({ pose }: { pose: Pose }) => {
   const navigation = useNavigation();
+  const { colors } = useTheme()
+  const styles = getStyles(colors)
 
   const getStatusIcon = () => {
     if (pose.isMissedToday) {
-      return <Fontisto name="close-a" size={20} color={'red'} />;
+      return <Fontisto name="close-a" size={15} color='black' />;
     }
     if (pose.isPoseClickedToday) {
-      return <Fontisto name="check" size={20} color={defaultColors.primary} />;
+      return <FontAwesome5 name="check-double" size={20} color='black' />;
     } else {
-      return <Fontisto name="camera" size={20} color={defaultColors.primary} />;
+      return <Ionicons name="camera-outline" size={32} color='black' />;
     }
   };
 
@@ -33,18 +37,22 @@ export const PoseParentCard = ({ pose }: { pose: Pose }) => {
       </View>
 
       <View style={styles.contentContainer}>
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{
-            color: 'white',
-            fontSize: 25,
-            marginLeft: '10%',
-            marginTop: 10,
-          }}
-        >
-          {pose.name?.length ? pose.name : 'Pose Name'}
-        </Text>
+        <View style={{ display: 'flex', flexDirection: 'row', gap: 5 }}>
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{
+              color: colors.defaultText,
+              fontSize: 18,
+              marginLeft: '10%',
+              // marginTop: 10,
+              fontWeight: '600'
+            }}
+          >
+            {pose.name?.length ? pose.name : 'Pose Name'}
+          </Text>
+          <Streak number={pose.streak} />
+        </View>
         <View
           style={{
             display: 'flex',
@@ -55,9 +63,9 @@ export const PoseParentCard = ({ pose }: { pose: Pose }) => {
         >
           <Text
             style={{
-              color: 'white',
+              color: colors.defaultText,
               width: '45%',
-              fontSize: 15,
+              fontSize: 14,
               marginLeft: '10%',
               marginTop: 10,
             }}
@@ -68,32 +76,12 @@ export const PoseParentCard = ({ pose }: { pose: Pose }) => {
                 minute: '2-digit',
               })}
           </Text>
-          <View
-            style={{
-              display: 'flex',
-              width: '45%',
-              marginTop: 10,
-              alignItems: 'center',
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <Text
-              style={{
-                color: 'white',
-                fontSize: 15,
-                marginRight: 2,
-              }}
-            >
-              {pose.streak}
-            </Text>
-            <Fontisto name="fire" size={17} color={'white'} />
-          </View>
+
           <Text
             style={{
-              color: 'white',
+              color: colors.defaultText,
               width: '45%',
-              fontSize: 15,
+              fontSize: 14,
               marginLeft: '10%',
               marginTop: 10,
             }}
@@ -106,15 +94,13 @@ export const PoseParentCard = ({ pose }: { pose: Pose }) => {
         <TouchableOpacity
           onPress={(e) => {
             e.stopPropagation();
-            navigation.navigate(NavigationScreens.CLICK_TODAY_SCREEN, {
-              pose,
-            });
+            navigation.navigate(NavigationScreens.CLICK_TODAY_SCREEN, { pose });
           }}
         >
           <View
             style={{
               ...styles.captureIcon,
-              borderColor: pose.isMissedToday ? 'red' : defaultColors.primary,
+              backgroundColor: pose.isMissedToday ? colors.errorBackground : pose.isPoseClickedToday ? colors.successBackground : colors.pendingBackground
             }}
           >
             {getStatusIcon()}
@@ -125,18 +111,22 @@ export const PoseParentCard = ({ pose }: { pose: Pose }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Colors) => StyleSheet.create({
   mainContainer: {
-    height: 125,
-    borderBottomWidth: 0.2,
-    borderColor: 'white',
-    borderRadius: 20,
-    margin: 5,
+    height: 106,
+    borderColor: colors.solidBorder,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderBottomWidth: 5,
+    marginVertical: 12,
     display: 'flex',
     flexDirection: 'row',
+    backgroundColor: colors.containerBackground,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8
   },
   contentContainer: {
-    height: 125,
     width: '50%',
   },
   iconsStatusContainer: {
@@ -146,23 +136,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   posePicture: {
-    backgroundColor: 'black',
+    backgroundColor: colors.containerBackground,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 125,
+    height: 90,
     width: '25%',
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: defaultColors.primary,
+    borderColor: colors.solidBorder,
+    overflow: 'hidden'
   },
   captureIcon: {
-    height: 50,
-    width: 50,
-    borderRadius: '50%',
-    borderWidth: 2,
+    height: 44,
+    width: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: colors.solidBorder,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    borderBottomWidth: 5
   },
 });

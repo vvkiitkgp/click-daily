@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
 import { enableScreens } from 'react-native-screens';
 import React, { useState } from 'react';
 import WelcomeScreen from './src/components/Screens/WelcomeScreen';
 enableScreens();
+
 
 export default function App() {
   const [isWelcomeVisible, setIsWelcomeVisible] = useState(true);

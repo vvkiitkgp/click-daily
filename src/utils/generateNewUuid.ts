@@ -1,5 +1,5 @@
 import UUID from 'react-native-uuid';
 
-export const generateNewUuid = ()=>{
-    return UUID.v4();
+export const generateNewUuid = (): string=>{
+    return UUID.v4() as string;
 }

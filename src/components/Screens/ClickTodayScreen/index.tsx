@@ -1,130 +1,117 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import PoseCapture from '../CreateNewPose/PoseCapture';
-import { Pose } from '../../../types';
+import { ChecklistItem, Pose } from '../../../types';
 import { PoseFilter } from './PoseFilter';
 import { Fontisto } from '@expo/vector-icons';
 import { saveImageToDevice } from '../CreateNewPose/utils';
 import { generateNewUuid } from '../../../utils/generateNewUuid';
-import { uploadPictureByPoseIdApi } from '../../../services/api';
+import { addDailyChecklist, uploadPictureByPoseIdApi } from '../../../services/api';
 import { useNavigation } from '@react-navigation/native';
+import { BackButton } from '../../Common/ui/IconButton/BackButton';
+import { ActionBar } from '../../Common/ActionBar';
+import defaultColors from '../../../styles/colors';
+import { useGetPoseDetails } from '../../../hooks/useGetPoseDetails';
+import CheckListItemCard from '../../Common/CheckListItemCard';
+import { NavigationScreens } from '../../../navigation/AppNavigator';
+import { useClickToday } from './hooks/useClickToday';
+import Loader from '../../Common/ui/Loader';
 
 export const ClickTodayScreen = ({ route }) => {
   const { pose } = route.params;
   const [poseCatureImage, setPoseCaptureImage] = useState<string | null>(null);
   const navigation = useNavigation();
+  const factId = generateNewUuid();
+  const [step, setStep] = useState<'capture' | 'checklist'>('capture')
+  const [newChecklistData, setNewChecklistData] = useState<ChecklistItem[]>([])
 
-  const getActionBar = () => {};
-  return (
+  const { data, loading, error } = useClickToday(pose.poseId);
+  useEffect(() => {
+    console.log(data?.poseData?.checklist, "CHECKKLIST")
+    if (data?.poseData?.checklist.length) {
+      setNewChecklistData(data.poseData?.checklist)
+    }
+  }, [data?.poseData?.checklist])
+
+  const onCheckCallback = (id: string) => {
+    setNewChecklistData((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, isChecked: !item.isChecked } : item
+      )
+    );
+  };
+
+  const onCountChangeCallack = (id: string, count: number) => {
+    setNewChecklistData((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, count } : item
+      )
+    );
+  };
+
+  const onDone = async () => {
+    await data?.handleDone(poseCatureImage, setPoseCaptureImage, pose, factId, newChecklistData,)
+    navigation.navigate(
+      NavigationScreens.HOME_SCREEN as never
+    );
+  }
+
+  return loading ? <View style={styles.loadingContainer}><Loader /></View> : error ? <View style={styles.loadingContainer}><Text>Something went wrong!</Text></View> : (
     <View style={styles.container}>
-      {!poseCatureImage ? (
-        <View
-          style={{
-            position: 'absolute',
-            height: 30,
-            width: 30,
-            backgroundColor: 'grey',
-            top: 70,
-            left: '5%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: 30,
-            zIndex: 999,
-          }}
-        >
-          <Fontisto
-            name="arrow-left"
-            size={20}
-            color="white"
-            onPress={() => navigation.goBack()}
-          />
-        </View>
+      {step === 'capture' ? !poseCatureImage ? (
+        <BackButton onBack={() => navigation.goBack()} />
       ) : (
-        <View
-          style={{
-            position: 'absolute',
-            height: 30,
-            width: '90%',
-            backgroundColor: 'grey',
-            top: 70,
-            left: '5%',
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: 30,
-            paddingLeft: '3%',
-            paddingRight: '3%',
-            zIndex: 999,
-          }}
-        >
-          <View style={{ width: '50%' }}>
-            <Fontisto
-              name="camera"
-              size={20}
-              color="white"
-              onPress={() => setPoseCaptureImage(null)}
-            />
-          </View>
-          <View
-            style={{
-              width: '50%',
-              display: 'flex',
-              alignItems: 'flex-end',
+        <BackButton name="camera" onBack={() => setPoseCaptureImage(null)} />
+      ) : <BackButton onBack={() => setStep('capture')} />}
+      <View style={{ flex: 1 }}>
+        <View style={{ flex: 0.9 }}>
+          {step === 'capture' ? <PoseCapture
+            setPoseCaptureImage={(image) => {
+              console.log(image, 'IMAGE');
+              setPoseCaptureImage(image);
             }}
-          >
-            <Fontisto
-              name="check"
-              size={20}
-              color="red"
-              onPress={async () => {
-                console.log('here');
-                saveImageToDevice(
-                  poseCatureImage,
-                  setPoseCaptureImage,
-                  () => {}
-                );
+            onNextCallback={() => { }}
+            image={poseCatureImage}
+            enableFilter
+            pose={pose}
+          /> : <View>
 
-                if (
-                  pose?.createdDate &&
-                  pose?.poseId &&
-                  pose?.userId &&
-                  poseCatureImage
-                ) {
-                  await uploadPictureByPoseIdApi({
-                    date: new Date(),
-                    day: 1,
-                    picture: poseCatureImage,
-                    pictureId: generateNewUuid().toString(),
-                    poseId: pose.poseId,
-                    streak: 1,
-                    userId: pose.userId,
-                  });
-                }
-              }}
-            />
-          </View>
+            <View>
+              {newChecklistData.map((item) => <CheckListItemCard
+                isEdit={false}
+                setIsEdit={id => null}
+                item={item}
+                onCheckCallback={onCheckCallback}
+                onCountChangeCallack={onCountChangeCallack}
+                onSaveCallback={() => null}
+                onDeleteCallback={() => null}
+                isDailyChecklist
+              />)}
+            </View>
+
+          </View>}
+
         </View>
-      )}
-      <PoseCapture
-        setPoseCaptureImage={(image) => {
-          console.log(image, 'IMAGE');
-          setPoseCaptureImage(image);
-        }}
-        onNextCallback={() => {}}
-        image={poseCatureImage}
-        enableFilter
-        pose={pose}
-      />
+        <View style={{ flex: 0.1 }}>
+          {step === 'capture' ? poseCatureImage ? <ActionBar primaryText='Next' onPrimaryClick={() => setStep('checklist')} /> : null : step === 'checklist' ? <ActionBar primaryText='Done' onPrimaryClick={onDone} /> : null}
+        </View>
+      </View>
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: defaultColors.backgroundDark,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    backgroundColor: defaultColors.backgroundDark,
   },
 });
 

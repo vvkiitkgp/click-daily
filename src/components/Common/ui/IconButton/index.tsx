@@ -2,6 +2,7 @@ import React from 'react';
 import { IconButton } from 'react-native-paper';
 import defaultColors from '../../../../styles/colors';
 import { StyleSheet, View } from 'react-native';
+import { useTheme } from '../../../../hooks/useTheme';
 
 interface BackButtonProps {
   onPress: () => void;
@@ -17,13 +18,14 @@ export const CustomIconButton = ({
   mode,
   style,
 }: BackButtonProps) => {
+  const { colors } = useTheme()
   return (
     <View style={style}>
       <IconButton
         icon={name}
         style={mode ? {} : { backgroundColor: 'none' }}
         iconColor={
-          mode ? defaultColors.buttonPrimary : defaultColors.backgroundWhite
+          colors.defaultText
         }
         size={size}
         onPress={onPress}

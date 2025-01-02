@@ -1,8 +1,8 @@
-import { Picture, Pose } from "../types"
+import { ChecklistItem, Picture, Pose } from "../types"
 import { getFileNameAndType } from "../utils/common";
 
-const API_BASE_URL = 'http://18.179.13.68:3000';
-
+const local = false;
+const API_BASE_URL = local ? "http://localhost:3000" :'http://18.179.13.68:3000';
 export const createNewPoseApi = async (data: Pose) =>{
   const result = await fetch(`${API_BASE_URL}/api/createNewPose`,{
     method: 'POST',
@@ -45,7 +45,51 @@ export const modifyPoseByIdApi = async (data: Pose) =>{
    }
   }
 
-export const uploadPictureByPoseIdApi = async (pictureData: Picture) => {
+  export const addDailyChecklist = async (checklist: ChecklistItem[], factId: string, poseId: string) =>{
+    console.log(JSON.stringify({checklist,factId,poseId}),"THISS")
+    const result = await fetch(`${API_BASE_URL}/api/addDailyChecklists`,{
+      method: 'POST',
+      body: JSON.stringify({checklist,factId,poseId}),
+      headers: {
+          'Content-Type': 'application/json'
+      }
+   })
+  
+   if(result.ok){
+      const response = await result.json();
+      if(response.sucess){
+          console.log(response.message)
+      } else {
+          console.error(response.message)
+      }
+   } else{
+      console.error("Something Went Wrong!! Unsuccessful call from backend")
+   }
+  }
+
+
+  export const deletePoseByIdApi = async (poseId: string) =>{
+    const result = await fetch(`${API_BASE_URL}/api/deletePoseById`,{
+      method: 'POST',
+      body: JSON.stringify({poseId}),
+      headers: {
+          'Content-Type': 'application/json'
+      }
+   })
+  
+   if(result.ok){
+      const response = await result.json();
+      if(response.sucess){
+          console.log(response.message)
+      } else {
+          console.error(response.message)
+      }
+   } else{
+      console.error("Something Went Wrong!! Unsuccessful call from backend")
+   }
+  }
+
+export const uploadPictureByPoseIdApi = async (pictureData: Picture, factId: string) => {
     try {
       const { fileName, mimeType } = getFileNameAndType(pictureData.picture);
   
@@ -56,7 +100,7 @@ export const uploadPictureByPoseIdApi = async (pictureData: Picture) => {
         name: fileName,
         type: mimeType,
       } as any);
-  
+      formData.append('factId', factId);
       formData.append('userId', pictureData.userId);
       formData.append('poseId', pictureData.poseId);
       formData.append('pictureId', pictureData.pictureId);
@@ -92,7 +136,8 @@ export const uploadPictureByPoseIdApi = async (pictureData: Picture) => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        cache: 'no-cache',
       });
   
       if (result.ok) {
@@ -113,28 +158,31 @@ export const uploadPictureByPoseIdApi = async (pictureData: Picture) => {
       return null;
     }
   };
-
-export const getPoseDetailsByPoseIdApi = async (poseId: string) => {
+  export const getPoseDetailsByPoseIdApi = async (poseId: string): Promise<Pose | null> => {
     try {
-        const result = await fetch(`${API_BASE_URL}/api/getPoseDetailsByPoseId/:${poseId}`, {
+        const result = await fetch(`${API_BASE_URL}/api/getPoseDetailsByPoseId/${poseId}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+            },
         });
 
         if (result.ok) {
             const response = await result.json();
             if (response.data) {
-                console.log("Poses retrieved successfully:", response.data);
+                console.log("Pose details retrieved successfully:", response.data);
+                return response.data; // Return the pose details
             } else {
                 console.error("Error from backend:", response.message);
+                return null;
             }
         } else {
-            console.error("Failed to retrieve poses. Backend call unsuccessful.");
+            console.error("Failed to retrieve pose details. Backend call unsuccessful.");
+            return null;
         }
     } catch (error) {
-        console.error("An error occurred while fetching poses:", error);
+        console.error("An error occurred while fetching pose details:", error);
+        return null;
     }
 };
 

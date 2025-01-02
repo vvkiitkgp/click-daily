@@ -4,9 +4,10 @@ const defaultColors = {
   borderPrimary: '#37d5d9',
   borderSecondary: 'white',
   backgroundDark: 'black',
+  backgroundDarkTransparent:'rgba(0, 0, 0, 0.4)',
   backgroundWhite: 'white',
   buttonDefault: '#1bb8bf',
-  buttonPrimary: '#1f616b',
+  buttonPrimary: '#37d5d9',
   buttonSecondary: 'white',
   buttonBorderPrimary: 'black',
   buttonBorderSecondary: '#1f616b',
@@ -18,3 +19,4 @@ const defaultColors = {
 };
 
 export default defaultColors;
+

@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Svg, Path as SVGPath } from 'react-native-svg';
 import { Picture, Pose } from '../../../../types';
 import defaultColors from '../../../../styles/colors';
 import { Fontisto } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 
 import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView';
 
@@ -38,7 +39,9 @@ export const ViewPhotoScreen = ({ pose, pictureData, withPose }: Props) => {
           <Image
             source={{ uri: pictureData.picture }}
             style={styles.image}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
+            transition={500}
           />
           {withPose && (
             <Svg style={styles.overlay} width="100%" height="100%">

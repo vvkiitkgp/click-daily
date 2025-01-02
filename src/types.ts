@@ -54,3 +54,5 @@ export interface AsyncResult<TData = any> {
   loading: boolean;
   error?: Error;
 }
+
+export type SubActions = 'compare' | 'checklist' | 'transformation' | 'details'

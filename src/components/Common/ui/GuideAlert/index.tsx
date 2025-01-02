@@ -17,7 +17,7 @@ export const GuideAlert = ({ message }: GuideAlertProps) => {
       <View
         style={{
           position: 'absolute',
-          top: '48%%',
+          top: '48%',
           height: 50,
           width: '100%',
           zIndex: 999,

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, Image } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import defaultColors from '../../../styles/colors';
+import { Image } from 'expo-image';
 
 const WelcomeScreen = ({
   onAnimationComplete,
@@ -32,7 +33,9 @@ const WelcomeScreen = ({
         <Image
           source={require('../../../../assets/images/Logo.png')}
           style={{ flex: 1, width: '100%', height: '100%' }}
-          resizeMode="contain"
+          contentFit="contain"
+          cachePolicy="memory-disk"
+          transition={500}
         />
       </View>
     </Animated.View>

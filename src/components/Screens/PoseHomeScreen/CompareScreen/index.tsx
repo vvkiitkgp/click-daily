@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import defaultColors from '../../../../styles/colors';
 import Dropdown from './Dropdown';
 import { Picture } from '../../../../types';
 import { getDropdownItems } from '../utils';
+import { Image } from 'expo-image';
 
 interface CompareScreenProps {
   data: Picture[];
@@ -48,7 +49,9 @@ export const CompareScreen = ({ data }: CompareScreenProps) => {
               uri: firstPicture?.picture,
             }}
             style={styles.image}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
+            transition={500}
           />
         </View>
         <View
@@ -62,7 +65,9 @@ export const CompareScreen = ({ data }: CompareScreenProps) => {
               uri: secondPicture?.picture,
             }}
             style={{ ...styles.image, opacity: 0.6 }}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
+            transition={500}
           />
         </View>
       </View>
@@ -70,8 +75,8 @@ export const CompareScreen = ({ data }: CompareScreenProps) => {
         <Slider
           style={styles.slider}
           minimumValue={0}
-          maximumValue={100}
-          step={1}
+          maximumValue={150}
+          step={10}
           value={value}
           onValueChange={(val) => setValue(val)}
           minimumTrackTintColor={defaultColors.primary}

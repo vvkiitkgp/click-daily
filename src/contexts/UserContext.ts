@@ -7,6 +7,7 @@ export interface User {
 export interface UserContextType {
   user: User;
   setUser: (u: User) => void;
+  
 }
 
 export const defaultUserContext: UserContextType = {

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyC-ogzHCHC2J7UYYG4MLPAI1bcjpp2YEGE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>93866807295</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.vvk.iitkgp.clickdaily</string>
+	<key>PROJECT_ID</key>
+	<string>click-daily-auth</string>
+	<key>STORAGE_BUCKET</key>
+	<string>click-daily-auth.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:93866807295:ios:3030965c69d778dab3a1ca</string>
+</dict>
+</plist>

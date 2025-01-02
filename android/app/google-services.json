@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "93866807295",
+    "project_id": "click-daily-auth",
+    "storage_bucket": "click-daily-auth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93866807295:android:2ae2f60fc6ad61aeb3a1ca",
+        "android_client_info": {
+          "package_name": "com.vvk.iitkgp.clickdaily"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1CbSEgbS5krNCv_T1mPs2hAx67DDgs9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

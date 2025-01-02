@@ -8,6 +8,8 @@ import { Divider } from 'react-native-paper';
 import { Fontisto } from '@expo/vector-icons';
 import Button from '../../Common/ui/Button';
 import { OtpInput } from 'react-native-otp-entry';
+// import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+// import firestore from "@react-native-firebase/firestore";
 
 // API Client
 import axios from 'axios';
@@ -15,6 +17,7 @@ import Dropdown from '../../Common/ui/Dropdown';
 import TextField from '../../Common/ui/TextField';
 import Loader from '../../Common/ui/Loader';
 import { BackButton } from '../../Common/ui/IconButton/BackButton';
+import { Colors, useTheme } from '../../../hooks/useTheme';
 // import IconButton from '../../Common/ui/IconButton';
 
 export const SignInScreen = () => {
@@ -24,8 +27,11 @@ export const SignInScreen = () => {
   const [messageType, setMessageType] = useState<string>();
   const navigate = useNavigation();
   const [isOtpScreen, seIsOtpScreen] = useState(false);
+  // const [confirm, setConfirm] = useState<FirebaseAuthTypes.ConfirmationResult>()
 
-  const otpInputRef = useRef();
+  const { colors } = useTheme()
+  const otpInputRef = useRef(null);
+
   const handleAlertMessage = (message: string, type = 'error') => {
     setAlertMessage(message);
     setMessageType(type);
@@ -37,17 +43,57 @@ export const SignInScreen = () => {
 
   const onSignIn = () => {
     // disabling sign in with hard code .. remove this in future
-    navigate.navigate(NavigationScreens.HOME_SCREEN as never);
+    confirmCode()
+    // navigate.navigate(NavigationScreens.HOME_SCREEN as never);
   };
 
   const onSendOtp = () => {
-    seIsOtpScreen(true);
+    navigate.navigate(NavigationScreens.HOME_SCREEN as never);
+    // signInWithPhoneNumber();
   };
+
   const onBack = () => {
-    otpInputRef.current.clear();
+    otpInputRef?.current?.clear();
     seIsOtpScreen(false);
   };
 
+  const styles = getStyles(colors)
+
+
+  const signInWithPhoneNumber = async () => {
+    // try {
+    //   const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+    //   // setConfirm(confirmation);
+    //   // seIsOtpScreen(true);
+    //   console.log(confirmation, "CONFIRMATION")
+    // } catch (error) {
+    //   console.log("Error senig code:", error)
+    // }
+  }
+
+  const confirmCode = async () => {
+    // try {
+
+    //   const userCredential = await confirm?.confirm(otpValue);
+    //   const user = userCredential?.user;
+    //   if (user) {
+    //     // const userDocument = await firestore().collection("users").doc(user.uid).get();
+
+    //     // if (userDocument.exists) {
+    //     //   // Already existing user
+    //     //   // Navigate to home screen
+    //     //   navigate.navigate(NavigationScreens.HOME_SCREEN as never);
+    //     // } else {
+    //     //   // New user, navigate to sign up screen
+    //     // }
+    //     console.log("Valid user", user)
+    //   } else {
+    //     console.log("Invalid user:")
+    //   }
+    // } catch (error) {
+    //   console.log("Invalid code:", error)
+    // }
+  }
   return (
     <View style={styles.container}>
       {isOtpScreen && <BackButton onBack={onBack} />}
@@ -93,8 +139,10 @@ export const SignInScreen = () => {
                 { label: 'India (+91)', value: '+91' },
               ]}
               value=""
-              setValue={() => {}}
+              setValue={() => { }}
               placeholder="Choose Country"
+              label='Country'
+              search
             />
           </View>
           <View style={styles.textFieldContainer}>
@@ -117,18 +165,14 @@ export const SignInScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+
+const getStyles = (colors: Colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: defaultColors.backgroundDark,
     display: 'flex',
     // justifyContent: 'center',
+    backgroundColor: colors.containerBackground,
     alignItems: 'center',
-  },
-  backButtonContainer: {
-    marginTop: 80,
-    alignSelf: 'flex-start',
-    marginLeft: 30,
   },
   input: {
     height: 60,
@@ -165,5 +209,6 @@ const styles = StyleSheet.create({
     marginVertical: 100,
   },
 });
+
 
 export default SignInScreen;

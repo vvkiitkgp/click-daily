@@ -23,7 +23,6 @@ export const formatPhotosToWeekArray = (
       week++;
     }
   });
-console.log(formatedPhotosToWeek,"formatedPhotosToWeek formatedPhotosToWeek formatedPhotosToWeek")
   return formatedPhotosToWeek;
 };
 

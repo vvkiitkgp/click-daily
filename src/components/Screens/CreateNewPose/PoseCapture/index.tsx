@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import {
   CameraView,
   Camera,
@@ -14,6 +14,7 @@ import { GuideAlert } from '../../../Common/ui/GuideAlert';
 import { Button } from 'react-native-elements';
 import { PoseFilter } from '../../ClickTodayScreen/PoseFilter';
 import { Pose } from '../../../../types';
+import { Image } from 'expo-image';
 
 interface Props {
   setPoseCaptureImage: (image: string) => void;
@@ -97,12 +98,9 @@ export const PoseCapture = ({
 
   const takePicture = async () => {
     if (cameraRef.current) {
-      console.log('takingg pic');
       try {
         const options = { quality: 0.5, base64: true, skipProcessing: true };
         const data = await cameraRef.current.takePictureAsync(options);
-
-        console.log(data, 'Captured Image Data');
         if (data) {
           setPoseCaptureImage(data.uri);
         }
@@ -143,8 +141,8 @@ export const PoseCapture = ({
             </View>
           )}
 
-          <TouchableOpacity onPress={takePicture} style={styles.captureButton}>
-            <GuideAlert message="Tap to Capture" />
+          <TouchableOpacity onPress={takePicture} style={{ position: 'absolute', bottom: 20, display: 'flex', alignSelf: 'center', zIndex: 999 }}>
+            <View style={{ width: 80, height: 80, borderRadius: 40, borderWidth: 5, borderColor: 'white', shadowColor: 'black', shadowOpacity: 1, shadowOffset: { height: 4, width: 0 } }}></View>
           </TouchableOpacity>
         </View>
       ) : (
@@ -157,6 +155,7 @@ export const PoseCapture = ({
           <Image source={{ uri: image }} style={styles.camera} />
         </>
       )}
+
     </View>
   );
 };
@@ -172,6 +171,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   camera: {
+    position: 'relative',
     flex: 1,
     width: '100%',
   },

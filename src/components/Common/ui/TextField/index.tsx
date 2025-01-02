@@ -1,39 +1,51 @@
 import { Fontisto } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Input } from 'react-native-elements';
 import defaultColors from '../../../../styles/colors';
+import { useTheme } from '../../../../hooks/useTheme';
+import { color } from 'react-native-elements/dist/helpers';
 
 interface TextFieldProps {
   value: string;
   onChange: (p: string) => void;
   placeholder: string;
-  textFieldStyles?: any;
+  label: string;
 }
 
 export const TextField = ({
   value,
   onChange,
   placeholder,
-  textFieldStyles,
+  label,
   ...props
 }: TextFieldProps) => {
+  const { styles: { textField: textFieldStyles } } = useTheme()
   return (
-    <Input
-      placeholder={placeholder}
-      onChangeText={onChange}
-      value={value}
-      inputStyle={{ ...styles.input, ...textFieldStyles }}
-      rightIcon={
-        <Fontisto
-          name="close"
-          size={18}
-          color={'white'}
-          onPress={() => onChange('')}
+    <View style={textFieldStyles.container}>
+      <View style={textFieldStyles.headingContainer}>
+        <Text style={textFieldStyles.headingText}>{label}</Text>
+      </View>
+      <View>
+        <Input
+          placeholder={placeholder}
+          onChangeText={onChange}
+          value={value}
+          inputContainerStyle={textFieldStyles.textFieldContainer}
+          inputStyle={textFieldStyles.text}
+          placeholderTextColor={textFieldStyles.placeholderText.color}
+          rightIcon={
+            <Fontisto
+              name="close"
+              size={18}
+              color={textFieldStyles.clearIcon.backgroundColor}
+              onPress={() => onChange('')}
+            />
+          }
+          {...props}
         />
-      }
-      {...props}
-    />
+      </View>
+    </View >
   );
 };
 

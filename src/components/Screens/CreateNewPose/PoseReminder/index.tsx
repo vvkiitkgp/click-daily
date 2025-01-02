@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { NativeSyntheticEvent, StyleSheet, Text, View } from 'react-native';
 import defaultColors from '../../../../styles/colors';
 import { Fontisto } from '@expo/vector-icons';
 import { Pose } from '../../../../types';
 import { PoseParentCard } from '../../../Common/PoseParentCard';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import TimePicker from '../../../Common/ui/TimePicker';
 
 interface PoseReminderProp {
   createdPose: Pose;
@@ -14,10 +15,10 @@ export const PoseReminder = ({
   createdPose,
   setCreatedPose,
 }: PoseReminderProp) => {
-  const onChange = ({ type }, selectedTime) => {
-    if (type === 'set') {
-      const currentTime = selectedTime;
-      setCreatedPose({ ...createdPose, reminder: currentTime });
+
+  const onChange = (event: DateTimePickerEvent, selectedTime?: Date) => {
+    if (event.type === 'set' && selectedTime) {
+      setCreatedPose({ ...createdPose, reminder: selectedTime });
     }
   };
 
@@ -37,6 +38,7 @@ export const PoseReminder = ({
           textColor={defaultColors.textColorPrimary}
           onChange={onChange}
         />
+        <TimePicker time={createdPose.reminder ? new Date(createdPose.reminder) : new Date()} setTime={(selectedTime) => setCreatedPose({ ...createdPose, reminder: selectedTime })} />
       </View>
     </View>
   );
@@ -45,7 +47,6 @@ export const PoseReminder = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 120,
     alignItems: 'center',
   },
   nameContainer: {

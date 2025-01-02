@@ -1,22 +1,21 @@
 import React from 'react';
 import { IconButton } from 'react-native-paper';
 import defaultColors from '../../../../styles/colors';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { IconSource } from 'react-native-paper/lib/typescript/components/Icon';
+import { useTheme } from '../../../../hooks/useTheme';
+import { Fontisto } from '@expo/vector-icons';
 
 interface BackButtonProps {
   onBack: () => void;
+  name?: IconSource;
 }
-export const BackButton = ({ onBack }: BackButtonProps) => {
+export const BackButton = ({ onBack, name }: BackButtonProps) => {
+  const { styles: { backButtonStyles }, colors } = useTheme()
   return (
-    <View style={styles.container}>
-      <IconButton
-        icon="arrow-left"
-        iconColor={defaultColors.buttonPrimary}
-        size={20}
-        onPress={onBack}
-        mode="contained"
-      />
-    </View>
+    <TouchableOpacity style={backButtonStyles.container} onPress={onBack}>
+      <Fontisto name='angle-left' size={20} style={{ shadowColor: 'red' }} />
+    </TouchableOpacity>
   );
 };
 
