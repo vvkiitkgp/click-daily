@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import defaultColors from '../../../styles/colors';
 import PoseCapture from './PoseCapture';
 import PoseDraw from './PoseDraw';
-import { saveImageToDevice } from './utils';
+import { saveImageToDevice, saveImageUriToStorage } from './utils';
 import {
   useCreateNewPoseHook,
   CreateNewPoseSteps,
@@ -44,6 +44,7 @@ export const CreateNewPose = () => {
     const currentIndex = stepsOrder.indexOf(step);
     const nextIndex = (currentIndex + 1) % stepsOrder.length;
     if (step === CreateNewPoseSteps.POSE_CHECKLIST) { // TODO Look  at this logic
+      console.log("here", createdPose?.checklist, factId)
       if (createdPose?.checklist && factId) {
         await addDailyChecklist(createdPose?.checklist, factId, createdPose?.poseId).then(() => {
           setStep(stepsOrder[nextIndex]);
@@ -75,16 +76,19 @@ export const CreateNewPose = () => {
 
   const onUploadPicture = async () => {
     if (firstImage) {
-      saveImageToDevice(firstImage, setFirstImage, () =>
+      const savedUri = await saveImageToDevice(firstImage, setFirstImage, () =>
         setStep(CreateNewPoseSteps.POSE_DRAW)
       );
       if (
         createdPose?.createdDate &&
         createdPose?.poseId &&
-        createdPose?.userId
+        createdPose?.userId &&
+        savedUri
       ) {
         const idforFact = generateNewUuid();
         setFactId(idforFact.toString());
+        console.log("uploadPictureByPoseIdApi called", firstImage)
+        // await saveImageUriToStorage(savedUri);
         await uploadPictureByPoseIdApi({
           date: createdPose.createdDate,
           day: 1,
@@ -97,6 +101,21 @@ export const CreateNewPose = () => {
       }
     }
   }
+
+  // const onUploadPicture = async () => {
+  //   if (firstImage) {
+  //     // Await saveImageToDevice to get the saved image URI
+  //     const savedUri = await saveImageToDevice(firstImage, setFirstImage, () =>
+  //       setStep(CreateNewPoseSteps.POSE_DRAW)
+  //     );
+
+  //     if (savedUri) {
+  //       await saveImageUriToStorage(savedUri); // Save to local storage
+  //       setFirstImage(savedUri);
+  //       setStep(CreateNewPoseSteps.POSE_DRAW);
+  //     }
+  //   }
+  // };
 
   const getActionBar = () => {
     if (step === CreateNewPoseSteps.POSE_CAPTURE) {

@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import { PoseParentCard } from '../../Common/PoseParentCard';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -21,6 +22,11 @@ import { ScrollView } from 'react-native-gesture-handler';
 import Loader from '../../Common/ui/Loader';
 import { Colors, useTheme } from '../../../hooks/useTheme';
 import ProfileCardMini from '../../Common/ProfileCardMini';
+import { getSavedImages } from './utils';
+import { Image } from 'expo-image';
+import * as MediaLibrary from "expo-media-library";
+import { Button } from 'react-native-elements';
+
 
 type AllPosesState = {
   data: Pose[] | null;
@@ -60,35 +66,20 @@ export const HomeScreen = () => {
           backgroundColor: colors.containerBackground,
         }}
       >
-        {loading ? (
-          <View
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Loader />
-          </View>
-        ) : (
-          <ScrollView style={styles.scrollableContainer}>
-            <View>
-              <View style={styles.profileCardContainer}>
-                <ProfileCardMini />
-              </View>
-              <Text style={styles.activityText}>Activity</Text>
-              <View style={styles.posesListContainer}>
-                {posesList?.map((pose) => {
-                  return <PoseParentCard pose={pose} />;
-                })}
-                <View style={{ height: 200 }} />
-              </View>
+        <ScrollView style={styles.scrollableContainer}>
+          <View>
+            <View style={styles.profileCardContainer}>
+              <ProfileCardMini />
             </View>
-          </ScrollView>
-
-        )}
-
+            <Text style={styles.activityText}>Activity</Text>
+            <View style={styles.posesListContainer}>
+              {posesList.length ? posesList?.map((pose) => {
+                return <PoseParentCard pose={pose} />;
+              }) : <View style={{ marginTop: 16 }}><Text style={{ fontSize: 20 }}>Create your first pose!</Text></View>}
+              <View style={{ height: 200 }} />
+            </View>
+          </View>
+        </ScrollView>
         <TouchableOpacity
           style={styles.createNewPoseFab}
           onPress={() => {

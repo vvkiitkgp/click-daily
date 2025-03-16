@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { Picture } from '../../../types';
 import defaultColors from '../../../styles/colors';
@@ -7,6 +7,8 @@ import SkeletonLoader from '../ui/Loader/CustomSkeleton';
 import { Image } from 'expo-image';
 import { Colors, useTheme } from '../../../hooks/useTheme';
 import Streak from '../Streak';
+import * as FileSystem from "expo-file-system";
+
 
 interface Props {
   size: number;
@@ -17,6 +19,24 @@ export const PictureInGrid = ({ size, pictureData, onPress }: Props) => {
   const [loading, setLoading] = useState(true);
   const { colors, styles: { defaultSolidBorder } } = useTheme();
   const styles = getStyles(colors, size)
+
+  const [imageExists, setImageExists] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkFileExists = async () => {
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(pictureData.picture);
+        console.log(fileInfo, "fileInfo")
+        setImageExists(fileInfo.exists);
+      } catch (error) {
+        console.error("Error checking file existence:", error);
+        setImageExists(false);
+      }
+    };
+
+    checkFileExists();
+  }, []);
+
 
   return (
     <TouchableOpacity
@@ -34,7 +54,7 @@ export const PictureInGrid = ({ size, pictureData, onPress }: Props) => {
           width={size}
         />
       )}
-      <Image
+      {imageExists ? <Image
         source={{ uri: pictureData.picture }}
         style={{ width: 120, height: 150, marginBottom: 5 }}
         contentFit="contain"
@@ -42,7 +62,8 @@ export const PictureInGrid = ({ size, pictureData, onPress }: Props) => {
         transition={1000}
         onLoadStart={() => setLoading(true)}
         onLoadEnd={() => setLoading(false)}
-      />
+      /> : <View><Text>image has been deleted</Text></View>}
+
       <View
         style={{
           width: '100%',

@@ -19,6 +19,7 @@ import Loader from '../../Common/ui/Loader';
 import { BackButton } from '../../Common/ui/IconButton/BackButton';
 import { Colors, useTheme } from '../../../hooks/useTheme';
 // import IconButton from '../../Common/ui/IconButton';
+import * as Notifications from 'expo-notifications';
 
 export const SignInScreen = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>('');
@@ -94,6 +95,49 @@ export const SignInScreen = () => {
     //   console.log("Invalid code:", error)
     // }
   }
+
+  const onPushNoti = async () => {
+    console.log("Push notifi")
+    // await triggerNotification();
+    await scheduleNotification()
+  }
+
+
+  // const triggerNotification = async () => {
+  //   const triggerDate = new Date();
+  //   triggerDate.setMinutes(triggerDate.getMinutes() + 1); // Schedule 1 minute in the future
+  //   console.log(triggerDate.getHours() as number, "HOUR")
+  //   await Notifications.scheduleNotificationAsync({
+  //     content: {
+  //       title: 'Hello!',
+  //       body: 'This is a basic local notification.',
+  //       data: { someData: 'goes here' },
+  //     },
+  //     trigger: null, // Immediate notification
+  //   });
+  // };
+
+  const scheduleNotification = async () => {
+    const triggerDate = new Date();
+    triggerDate.setMinutes(triggerDate.getMinutes() + 1); // Schedule 1 minute in the future
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Daily Reminder',
+        body: 'This is your daily notification.',
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: triggerDate.getHours(),
+        minute: triggerDate.getMinutes()
+      },
+    });
+
+    console.log('Notification scheduled for:', triggerDate);
+  };
+
+
+
   return (
     <View style={styles.container}>
       {isOtpScreen && <BackButton onBack={onBack} />}
@@ -159,7 +203,10 @@ export const SignInScreen = () => {
       {isOtpScreen ? (
         <Button name="Sign In" onPress={onSignIn} primary />
       ) : (
-        <Button name="Send OTP" onPress={onSendOtp} primary />
+        <>
+          <Button name="Send OTP" onPress={onSendOtp} primary />
+          <Button name="Push Noti" onPress={onPushNoti} primary />
+        </>
       )}
     </View>
   );

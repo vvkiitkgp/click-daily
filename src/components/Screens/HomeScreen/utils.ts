@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Pose } from "../../../types";
 import { DEFAULT_USER_ID } from "../../../utils/common";
 
@@ -22,3 +23,8 @@ export const getDefaultCreatePoseData = () => {
 
       return pose
 }
+
+export const getSavedImages = async () => {
+  const storedImages = await AsyncStorage.getItem('savedImages');
+  return storedImages ? JSON.parse(storedImages) : [];
+};

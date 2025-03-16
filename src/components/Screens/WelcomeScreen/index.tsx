@@ -2,17 +2,17 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import defaultColors from '../../../styles/colors';
 import { Image } from 'expo-image';
+import { FullLogo } from '../../../logos/FullLogo';
 
 const WelcomeScreen = ({
   onAnimationComplete,
 }: {
   onAnimationComplete: () => void;
 }) => {
-  const fadeAnim = new Animated.Value(0); // Initial opacity value
-
+  const fadeAnim = new Animated.Value(1); // Initial opacity value
   useEffect(() => {
     Animated.timing(fadeAnim, {
-      toValue: 1, // Fade to full opacity
+      toValue: 0, // Fade to full opacity
       duration: 3000, // Duration in ms
       useNativeDriver: true,
     }).start(() => {
@@ -25,18 +25,17 @@ const WelcomeScreen = ({
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <View
         style={{
-          width: 300,
-          height: 60,
-          backgroundColor: 'none',
+          flex: 1,
+          backgroundColor: 'white',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
       >
-        <Image
-          source={require('../../../../assets/images/Logo.png')}
-          style={{ flex: 1, width: '100%', height: '100%' }}
-          contentFit="contain"
-          cachePolicy="memory-disk"
-          transition={500}
-        />
+        <FullLogo color={defaultColors.primary} style={{
+          width: '100%',
+          aspectRatio: 1,
+          height: undefined,
+        }} />
       </View>
     </Animated.View>
   );

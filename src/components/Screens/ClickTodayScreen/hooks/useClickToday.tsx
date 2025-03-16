@@ -52,8 +52,6 @@ export const useClickToday = (poseId: string): AsyncResult<ClickTodayData> => {
         } finally {
             setProcessing(false);
         }
-
-
     }
 
     const loading = PoseDetailsLoading || processing;

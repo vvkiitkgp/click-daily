@@ -8,6 +8,8 @@ import defaultColors from '../../../styles/colors';
 import { Fontisto, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Colors, useTheme } from '../../../hooks/useTheme';
 import Streak from '../Streak';
+import * as FileSystem from 'expo-file-system';
+
 
 export const PoseParentCard = ({ pose }: { pose: Pose }) => {
   const navigation = useNavigation();
@@ -27,7 +29,7 @@ export const PoseParentCard = ({ pose }: { pose: Pose }) => {
 
   return (
     <TouchableOpacity
-      onPress={() =>
+      onPress={async () =>
         navigation.navigate(NavigationScreens.POSE_HOME_SCREEN, { pose })
       }
       style={styles.mainContainer}
@@ -118,7 +120,7 @@ const getStyles = (colors: Colors) => StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderBottomWidth: 5,
-    marginVertical: 12,
+    marginVertical: 8,
     display: 'flex',
     flexDirection: 'row',
     backgroundColor: colors.containerBackground,
